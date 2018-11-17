@@ -14,6 +14,7 @@ import PageLayout from '../../components/PageLayout';
 import DbRolePicker from '../../components/DbRolePicker';
 import DbTablePicker from '../../components/DbTablePicker';
 import DbTableGrantsForm from '../../components/DbTableGrantsForm';
+import DbTableRlsForm from '../../components/DbTableRlsForm'
 
 const styles = theme => ({
   paper: {
@@ -88,10 +89,7 @@ class RightsPage extends React.Component<Props> {
                 </Typography>
               </ExpansionPanelSummary>
               <ExpansionPanelDetails>
-                <Typography>
-                  Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse malesuada lacus ex,
-                  sit amet blandit leo lobortis eget.
-                </Typography>
+                <DbTableRlsForm dbConnectionsManager={dbConnectionsManager}/>
               </ExpansionPanelDetails>
             </ExpansionPanel>
           </Paper>

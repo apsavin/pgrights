@@ -2,6 +2,8 @@ import { decorate, observable, flow, action, computed } from 'mobx';
 import { boundMethod } from 'autobind-decorator'
 import DbConnection from './DbConnection';
 import type { TDbConnectionData } from './DbConnection';
+import DbTable from './DbTable';
+import DbSchema from './DbSchema';
 
 class DbConnectionsManager {
   constructor() {
@@ -26,7 +28,7 @@ class DbConnectionsManager {
     });
   }
 
-  getCurrentConnection() {
+  getCurrentConnection(): DbConnection {
     return this.connections[this.currentConnectionName];
   }
 
@@ -40,7 +42,7 @@ class DbConnectionsManager {
     yield this.setCurrentSchema({ schemaName: firstSchemaName });
   }).bind(this);
 
-  getCurrentSchema() {
+  getCurrentSchema(): DbSchema {
     return this.getCurrentConnection().schemas[this.currentSchemaName];
   }
 
@@ -51,7 +53,7 @@ class DbConnectionsManager {
     yield this.setCurrentTable({ tableName: schema.tablesNames[0] });
   }).bind(this);
 
-  getCurrentTable() {
+  getCurrentTable(): DbTable {
     return this.getCurrentSchema().tables[this.currentTableName];
   }
 
@@ -61,6 +63,7 @@ class DbConnectionsManager {
     yield Promise.all([
       table.fetchColumns(),
       table.fetchPrivileges(),
+      table.fetchPolicies(),
     ]);
   }).bind(this);
 

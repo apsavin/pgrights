@@ -1,6 +1,8 @@
 import { decorate, observable, flow } from 'mobx';
+import pgArray from 'postgres-array';
 import DbColumn from './DbColumn';
 import DbPrivilegesManager from './DbPrivilegesManager';
+import DbPoliciesManager from './DbPoliciesManager';
 
 type DbTablePrivilege = {
   grantor: string,
@@ -22,6 +24,7 @@ class DbTable {
     this.columns = {};
     this.columnsNames = [];
     this.privileges = new DbPrivilegesManager();
+    this.policies = new DbPoliciesManager();
   }
 
   fetchColumns = flow(function* fetchColumns() {
@@ -43,7 +46,7 @@ class DbTable {
         grantor,
         grantee,
         privilege_type: type,
-        is_grantable
+        is_grantable,
       } = privilegeData;
       if (!this.columns[name]) {
         this.columnsNames.push(name);
@@ -57,8 +60,10 @@ class DbTable {
   fetchPrivileges = flow(function* fetchPrivileges() {
     const { name: tableName, schemaName, db } = this;
     const tablePrivileges = yield db.query(
-      `select * from information_schema.table_privileges as cp
-           where cp.table_schema = $(schemaName) and cp.table_name = $(tableName);`,
+        `select *
+           from information_schema.table_privileges as cp
+           where cp.table_schema = $(schemaName)
+             and cp.table_name = $(tableName);`,
       { schemaName, tableName },
     );
 
@@ -70,11 +75,38 @@ class DbTable {
         grantee,
         privilege_type: type,
         is_grantable,
-        with_hierarchy
+        with_hierarchy,
       } = privilegeData;
       const isGrantable = is_grantable === 'YES';
       const withHierarchy = with_hierarchy === 'YES';
       this.privileges.add({ grantor, grantee, type, isGrantable, withHierarchy });
+    });
+  });
+
+  fetchPolicies = flow(function* fetchPolicies() {
+    const { name: tableName, schemaName, db } = this;
+    const policies = yield db.query(
+        `select *
+           from pg_catalog.pg_policies as p
+           where p.schemaname = $(schemaName)
+             and p.tablename = $(tableName)
+           order by policyname;`,
+      { schemaName, tableName },
+    );
+    this.policies = new DbPoliciesManager();
+
+    policies.forEach((policy) => {
+      const {
+        policyname: name, permissive, cmd: command, qual: qualifier, with_check: check, roles,
+      } = policy;
+      this.policies.add({
+        name,
+        permissive: permissive === 'PERMISSIVE',
+        command,
+        qualifier,
+        check,
+        roles: pgArray.parse(roles),
+      });
     });
   });
 }
@@ -83,6 +115,7 @@ decorate(DbTable, {
   columns: observable,
   columnsNames: observable,
   privileges: observable,
+  policies: observable,
 });
 
 export default DbTable;

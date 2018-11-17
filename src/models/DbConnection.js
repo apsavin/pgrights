@@ -26,7 +26,6 @@ class DbConnection {
     this.rolesNames = [];
     this.schemas = {};
     this.schemasNames = [];
-    this.rlsPoliciesByRole = {};
   }
 
   getDb() {
@@ -55,19 +54,12 @@ class DbConnection {
     const roles = yield db.query('select * from pg_catalog.pg_roles order by rolname;');
     this.rolesNames = roles.map(({ rolname }) => rolname);
   });
-
-  fetchRlsPolicies = flow(function* fetchRlsPolicies() {
-    const db = this.getDb();
-    const policies = yield db.query('select * from pg_catalog.pg_policies');
-    this.rlsPoliciesByRole = policies;
-  });
 }
 
 decorate(DbConnection, {
   rolesNames: observable,
   schemas: observable,
   schemasNames: observable,
-  rlsPoliciesByRole: observable,
 });
 
 export default DbConnection;

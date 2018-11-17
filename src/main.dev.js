@@ -12,7 +12,6 @@
 import { app, BrowserWindow, Menu, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import api from './main/api';
 
 export default class AppUpdater {
   constructor() {
@@ -134,9 +133,4 @@ app.on('ready', async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
-});
-
-ipcMain.on('api-request', async (event, { id, action, data }) => {
-  const result = await api[action](data);
-  event.sender.send('api-response-' + id, result);
 });

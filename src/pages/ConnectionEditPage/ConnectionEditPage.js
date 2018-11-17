@@ -6,8 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import withStyles from '@material-ui/core/styles/withStyles';
-import { sendRequest } from '../../utils/api';
-import apiActions from '../../constants/apiActions';
 import ModalLayout from '../../components/ModalLayout';
 import type DbConnection, { TDbConnectionData } from '../../models/DbConnection';
 
@@ -37,8 +35,8 @@ class ConnectionEditPage extends React.Component<Props> {
     const { connection, addConnection } = this.props;
 
     // TODO: implement
-    await sendRequest({ action: apiActions.removeConnection, data: { name: connection.name } });
-    await sendRequest({ action: apiActions.updateConnection, data });
+    // await sendRequest({ action: apiActions.removeConnection, data: { name: connection.name } });
+    // await sendRequest({ action: apiActions.updateConnection, data });
     addConnection(data);
     this.props.router.toConnectionChoose();
   };

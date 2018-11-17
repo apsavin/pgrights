@@ -1,7 +1,5 @@
 import { decorate, observable, flow, action, computed } from 'mobx';
 import { boundMethod } from 'autobind-decorator'
-import apiActions from '../constants/apiActions';
-import { sendRequest } from '../utils/api';
 import DbConnection from './DbConnection';
 import type { TDbConnectionData } from './DbConnection';
 
@@ -33,8 +31,6 @@ class DbConnectionsManager {
   }
 
   connect = flow(function* connect({ connectionName }) {
-    // must be first: we don't want to send current connection on every request
-    yield sendRequest({ action: apiActions.setCurrentConnection, data: { name: connectionName } });
     this.currentConnectionName = connectionName;
     const connection = this.getCurrentConnection();
     yield connection.fetchSchemas();
@@ -62,7 +58,10 @@ class DbConnectionsManager {
   setCurrentTable = flow(function* setCurrentTable({ tableName }) {
     this.currentTableName = tableName;
     const table = this.getCurrentTable();
-    yield table.fetchColumns();
+    yield Promise.all([
+      table.fetchColumns(),
+      table.fetchPrivileges(),
+    ]);
   }).bind(this);
 
   setCurrentRole = flow(function* setCurrentRole({ roleName }) {

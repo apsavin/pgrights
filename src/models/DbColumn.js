@@ -1,35 +1,29 @@
 import { decorate, observable } from 'mobx';
 import { get } from 'lodash';
+import DbPrivilegesManager from './DbPrivilegesManager';
 
-type Privilege = {
-  name: string,
+type DbColumnPrivilege = {
   grantor: string,
   grantee: string,
   type: 'SELECT' | 'UPDATE' | 'DELETE' | 'INSERT' | 'REFERENCES',
   isGrantable: boolean,
 };
 
+export const dbColumnPrivilegeTypes = ['SELECT', 'UPDATE', 'DELETE', 'INSERT', 'REFERENCES'];
+
 class DbColumn {
-  constructor({ name, connectionName, schemaName, tableName }) {
+  privileges: DbPrivilegesManager<DbColumnPrivilege>;
+
+  constructor({ name, schemaName, tableName }) {
     this.name = name;
-    this.connectionName = connectionName;
     this.schemaName = schemaName;
     this.tableName = tableName;
-    this.privilegesByGrantee = {};
-  }
-
-  addPrivilege(privilege: Privilege) {
-    this.privilegesByGrantee[privilege.grantee] = this.privilegesByGrantee[privilege.grantee] || {};
-    this.privilegesByGrantee[privilege.grantee][privilege.type] = privilege;
-  }
-
-  getPrivilege(grantee, type) {
-    return get(this.privilegesByGrantee, [grantee, type]);
+    this.privileges = new DbPrivilegesManager();
   }
 }
 
 decorate(DbColumn, {
-  privilegesByGrantee: observable,
+  privileges: observable,
 });
 
 export default DbColumn;

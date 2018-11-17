@@ -1,7 +1,8 @@
 import { decorate, observable, flow } from 'mobx';
-import apiActions from '../constants/apiActions';
-import { sendRequest } from '../utils/api';
+import pgpFactory from 'pg-promise';
 import DbSchema from './DbSchema';
+
+const pgp = pgpFactory();
 
 export type TDbConnectionData = {
   name: string,
@@ -25,24 +26,40 @@ class DbConnection {
     this.rolesNames = [];
     this.schemas = {};
     this.schemasNames = [];
+    this.rlsPoliciesByRole = {};
+  }
+
+  getDb() {
+    if (!this.db) {
+      const { database, host, port, user, password } = this;
+      this.db = pgp({ database, host, port, user, password });
+    }
+    return this.db;
   }
 
   fetchSchemas = flow(function* fetchSchemas() {
-    const schemas = yield sendRequest({ action: apiActions.getDatabaseSchemas });
-    const connectionName = this.name;
+    const db = this.getDb();
+    const schemas = yield db.query('select * from information_schema.schemata');
 
     this.schemasNames = [];
     this.schemas = {};
 
     schemas.forEach(({ schema_name: name } ) => {
       this.schemasNames.push(name);
-      this.schemas[name] = new DbSchema({ name, connectionName });
+      this.schemas[name] = new DbSchema({ name, db });
     });
   });
 
   fetchRoles = flow(function* fetchSchemas() {
-    const roles = yield sendRequest({ action: apiActions.getRoles });
+    const db = this.getDb();
+    const roles = yield db.query('select * from pg_catalog.pg_roles order by rolname;');
     this.rolesNames = roles.map(({ rolname }) => rolname);
+  });
+
+  fetchRlsPolicies = flow(function* fetchRlsPolicies() {
+    const db = this.getDb();
+    const policies = yield db.query('select * from pg_catalog.pg_policies');
+    this.rlsPoliciesByRole = policies;
   });
 }
 
@@ -50,6 +67,7 @@ decorate(DbConnection, {
   rolesNames: observable,
   schemas: observable,
   schemasNames: observable,
+  rlsPoliciesByRole: observable,
 });
 
 export default DbConnection;

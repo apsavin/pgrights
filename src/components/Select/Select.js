@@ -6,9 +6,12 @@ import MuiSelect from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 
 const styles = theme => ({
-  layout: {
-    height: '100vh'
+  label: {
+    paddingLeft: theme.spacing.unit,
   },
+  selectMenu: {
+    paddingLeft: theme.spacing.unit * 2,
+  }
 });
 
 type Props = {
@@ -17,6 +20,7 @@ type Props = {
   classes: $Call<typeof styles>,
   children: React.Node,
   onChange: (Event) => void,
+  className: string,
 };
 type State = {
   value: string,
@@ -35,15 +39,16 @@ class Select extends React.Component<Props, State> {
   };
 
   render() {
-    const { classes, dataForOptions, labelKeyName, valueKeyName, name, id, label } = this.props;
+    const { classes, dataForOptions, labelKeyName, valueKeyName, name, id, label, className } = this.props;
 
     return (
-      <FormControl>
-        <InputLabel htmlFor={id}>{label}</InputLabel>
+      <FormControl className={className}>
+        <InputLabel htmlFor={id} className={classes.label}>{label}</InputLabel>
         <MuiSelect
           value={this.props.value || this.state.value}
           onChange={this.handleChange}
           inputProps={{ name, id }}
+          classes={{ selectMenu: classes.selectMenu }}
         >
           {
             dataForOptions.map((datum) => {

@@ -5,6 +5,7 @@ import { AutoSizer } from 'react-virtualized';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
+import Tooltip from '@material-ui/core/Tooltip';
 import MuiTable from 'mui-virtualized-table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 
@@ -49,6 +50,7 @@ class DbTableRlsForm extends React.Component<Props> {
                 name: 'id',
                 header: <Typography variant="h6">Name</Typography>,
                 cellProps: { padding: 'checkbox' },
+                cell: ({ name }) => <Tooltip title={name}><Typography variant="body2">{name}</Typography></Tooltip>,
               },
               {
                 name: 'permissive',
@@ -65,11 +67,13 @@ class DbTableRlsForm extends React.Component<Props> {
                 name: 'qualifier',
                 header: <Typography variant="h6">Qualifier</Typography>,
                 cellProps: { padding: 'checkbox' },
+                cell: ({ qualifier }) => <Tooltip title={qualifier}><Typography variant="body2">{qualifier}</Typography></Tooltip>,
               },
               {
                 name: 'check',
                 header: <Typography variant="h6">With check</Typography>,
                 cellProps: { padding: 'checkbox' },
+                cell: ({ check }) => <Tooltip title={check}><Typography variant="body2">{check}</Typography></Tooltip>,
               },
             ]}
             width={width}

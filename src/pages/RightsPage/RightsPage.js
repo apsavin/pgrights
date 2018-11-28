@@ -27,6 +27,8 @@ const styles = theme => ({
     height: '100vh',
     width: '100%',
     overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
   },
   centerWrapper: {
     backgroundColor: theme.palette.background.default,

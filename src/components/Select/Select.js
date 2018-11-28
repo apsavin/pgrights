@@ -10,7 +10,7 @@ const styles = theme => ({
     paddingLeft: theme.spacing.unit,
   },
   selectMenu: {
-    paddingLeft: theme.spacing.unit * 2,
+    paddingLeft: theme.spacing.unit,
   }
 });
 

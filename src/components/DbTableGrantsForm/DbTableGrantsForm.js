@@ -5,6 +5,7 @@ import { Column, Table, AutoSizer } from 'react-virtualized';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
+import Divider from '@material-ui/core/Divider';
 import TableCell from '@material-ui/core/TableCell';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 import { dbColumnPrivilegeTypes } from '../../models/DbColumn';
@@ -19,7 +20,13 @@ type Props = {
 
 function headerRenderer({ dataKey, label }) {
   return (
-    <TableCell component="div" variant="head" padding="checkbox" style={{ flexGrow: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+    <TableCell component="div" variant="head" padding="checkbox" style={{
+      flexGrow: 1,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      display: 'flex',
+      alignItems: 'center',
+    }}>
       <Typography variant="h6">{label}</Typography>
     </TableCell>
   );
@@ -62,21 +69,22 @@ class DbTableGrantsForm extends React.Component<Props> {
 
     return (
       <React.Fragment>
-        <div>
+        <div><Typography variant="h6">
           {dbTablePrivilegeTypes.map(type => {
             return (
               <React.Fragment key={type}>
-                {type}:&nbsp;<Checkbox checked={!!(currentTable && currentTable.privileges.get(grantee, type))}/>
+                {capitalize(type)}:&nbsp;<Checkbox checked={!!(currentTable && currentTable.privileges.get(grantee, type))}/>
               </React.Fragment>
             );
-          })}
+          })}</Typography>
         </div>
+        <Divider />
         <AutoSizer disableHeight>
           {({ width }) => (
             <Table
               width={width}
               height={height}
-              headerHeight={heightOfCell}
+              headerHeight={56}
               rowHeight={heightOfCell}
               rowCount={grantedData.length}
               rowGetter={({ index }) => grantedData[index]}

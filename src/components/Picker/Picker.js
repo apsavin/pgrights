@@ -60,13 +60,18 @@ type Props = {
 
 class Picker extends React.Component<Props> {
 
-  constructor(props) {
-    super(props);
-    const { options, value } = props;
-    this.state = {
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { options, value } = nextProps;
+
+    if (prevState && options === prevState.options) {
+      return null;
+    }
+
+    return {
       selectedOptionIndex: options.findIndex(option => option === value),
       filterValue: '',
       filteredOptions: options,
+      options,
     };
   }
 

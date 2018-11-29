@@ -41,13 +41,13 @@ class DbTablePicker extends React.Component<Props> {
     const { classes, dbConnectionsManager } = this.props;
     const { schemasNames } = dbConnectionsManager.getCurrentConnection();
     const { tablesNames } = dbConnectionsManager.getCurrentSchema();
-    const { currentTableName } = dbConnectionsManager;
+    const { currentSchemaName, currentTableName } = dbConnectionsManager;
 
     return (
       <React.Fragment>
         <Paper square elevation={0} className={classes.selectWrapper}>
           <Select
-            value={dbConnectionsManager.currentSchemaName}
+            value={currentSchemaName}
             name="schemas"
             label="Schema"
             dataForOptions={schemasNames}

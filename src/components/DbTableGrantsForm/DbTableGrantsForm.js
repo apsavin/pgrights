@@ -66,7 +66,7 @@ class DbTableGrantsForm extends React.Component<Props> {
           {dbTablePrivilegeTypes.map(type => {
             return (
               <React.Fragment key={type}>
-                {type}:&nbsp;<Checkbox checked={!!currentTable.privileges.get(grantee, type)}/>
+                {type}:&nbsp;<Checkbox checked={!!(currentTable && currentTable.privileges.get(grantee, type))}/>
               </React.Fragment>
             );
           })}

@@ -1,4 +1,5 @@
 import { decorate, observable, flow } from 'mobx';
+import pgArray from 'postgres-array';
 import pgpFactory from 'pg-promise';
 import DbSchema from './DbSchema';
 
@@ -23,6 +24,7 @@ class DbConnection {
     this.user = user;
     this.password = password;
 
+    this.roles = {};
     this.rolesNames = [];
     this.schemas = {};
     this.schemasNames = [];
@@ -43,7 +45,7 @@ class DbConnection {
     this.schemasNames = [];
     this.schemas = {};
 
-    schemas.forEach(({ schema_name: name } ) => {
+    schemas.forEach(({ schema_name: name }) => {
       this.schemasNames.push(name);
       this.schemas[name] = new DbSchema({ name, db });
     });
@@ -51,12 +53,31 @@ class DbConnection {
 
   fetchRoles = flow(function* fetchSchemas() {
     const db = this.getDb();
-    const roles = yield db.query('select * from pg_catalog.pg_roles order by rolname;');
-    this.rolesNames = roles.map(({ rolname }) => rolname);
+    const roles = yield db.query(`
+      select a.rolname, a.oid, array_agg(m.roleid) as parents_oids
+        from pg_roles as a
+             left join pg_auth_members as m on m.member = a.oid
+        group by a.rolname, a.oid
+        order by a.rolname;
+    `);
+    this.roles = {};
+    const rolesByIds = {};
+
+    roles.forEach((role) => {
+      const { rolname: name, oid } = role;
+      this.roles[name] = { oid, name };
+      rolesByIds[oid] = this.roles[name];
+    });
+    this.rolesNames = Object.keys(this.roles);
+    roles.forEach((role) => {
+      const { rolname: name, parents_oids: parentsOids } = role;
+      this.roles[name].parents = parentsOids.filter(Boolean).map(oid => rolesByIds[oid].name);
+    });
   });
 }
 
 decorate(DbConnection, {
+  roles: observable,
   rolesNames: observable,
   schemas: observable,
   schemasNames: observable,

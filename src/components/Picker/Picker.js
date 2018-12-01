@@ -118,7 +118,7 @@ class Picker extends React.Component<Props> {
       }
       case 'ArrowUp': {
         event.preventDefault();
-        const selectedOptionIndex = index > -1 ? index - 1 : options.length - 1;
+        const selectedOptionIndex = index > 0 ? index - 1 : options.length - 1;
         this.setState({ selectedOptionIndex });
         break;
       }
@@ -164,31 +164,18 @@ class Picker extends React.Component<Props> {
     };
 
     return (
-      <ArrowKeyStepper
-        isControlled
-        columnCount={1}
-        mode={'cells'}
-        rowCount={filteredOptions.length}
-        onScrollToChange={({ scrollToRow }) => this.selectOption(scrollToRow)}
-        scrollToRow={selectedOptionIndex}
-        className={classes.listInner}
-      >
-        {({ onSectionRendered, scrollToColumn, scrollToRow }) => (
-          <AutoSizer>
-            {({ width, height }) => (
-              <VirtualizedList
-                width={width}
-                height={height}
-                rowCount={filteredOptions.length}
-                rowHeight={32}
-                rowRenderer={rowRenderer}
-                onSectionRendered={onSectionRendered}
-                scrollToColumn={scrollToColumn}
-                scrollToRow={scrollToRow}
-              />
-            )}</AutoSizer>
+      <AutoSizer>
+        {({ width, height }) => (
+          <VirtualizedList
+            width={width}
+            height={height}
+            rowCount={filteredOptions.length}
+            rowHeight={32}
+            rowRenderer={rowRenderer}
+            scrollToIndex={selectedOptionIndex}
+          />
         )}
-      </ArrowKeyStepper>
+      </AutoSizer>
     );
   }
 

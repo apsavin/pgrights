@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { capitalize } from 'lodash';
 import { observer } from 'mobx-react';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
@@ -9,8 +8,7 @@ import TableCell from '@material-ui/core/TableCell';
 import Table from '../Table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 
-const styles = theme => ({
-});
+const styles = theme => ({});
 
 type Props = {
   classes: $Call<typeof styles>,
@@ -81,25 +79,30 @@ class DbTableRlsForm extends React.Component<Props> {
     ];
 
     return (
-      <Table data={policiesTableData} columns={columns} rowRenderer={(tableRow) => {
-        if (typeof tableRow === 'string') {
+      <Table
+        data={policiesTableData}
+        columns={columns}
+        rowRenderer={(tableRow) => {
+          if (typeof tableRow === 'string') {
+            return (
+              <TableCell colSpan={columns.length}>
+                Inherited from <b>{tableRow}</b>
+              </TableCell>
+            );
+          }
           return (
-            <TableCell colSpan={columns.length}>
-              Inherited from <b>{tableRow}</b>
-            </TableCell>
+            <React.Fragment>
+              {columns.map(column => {
+                const { cell = (data) => data[column.name] } = column;
+                return (
+                  <TableCell key={column.name}>{cell(tableRow)}</TableCell>
+                );
+              })}
+            </React.Fragment>
           );
-        }
-        return (
-          <React.Fragment>
-            {columns.map(column => {
-              const { cell = (data) => data[column.name] } = column;
-              return (
-                <TableCell>{cell(tableRow)}</TableCell>
-              );
-            })}
-          </React.Fragment>
-        );
-      }}/>
+        }}
+        rowKey={(tableRow, i) => `${tableRow.name || tableRow}_${i}`}
+      />
     );
   }
 }

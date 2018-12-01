@@ -1,8 +1,9 @@
-import { decorate, observable, flow } from 'mobx';
+import { decorate, observable, flow, computed } from 'mobx';
 import pgArray from 'postgres-array';
 import DbColumn from './DbColumn';
 import DbPrivilegesManager from './DbPrivilegesManager';
 import DbPoliciesManager from './DbPoliciesManager';
+import Fetcher from './Fetcher';
 
 type DbTablePrivilege = {
   grantor: string,
@@ -23,19 +24,56 @@ class DbTable {
     this.schemaName = schemaName;
     this.columns = {};
     this.columnsNames = [];
+
     this.privileges = new DbPrivilegesManager();
     this.policies = new DbPoliciesManager();
+
+    const tableName = name;
+    this.columnsFetcher = new Fetcher({
+      fetch: () => {
+        return db.query(
+            `select *
+               from information_schema.column_privileges as cp
+               where cp.table_schema = $(schemaName)
+                 and cp.table_name = $(tableName);`,
+          { schemaName, tableName },
+        );
+      },
+    });
+    this.privilegesFetcher = new Fetcher({
+      fetch: () => {
+        return db.query(
+          `select *
+           from information_schema.table_privileges as cp
+           where cp.table_schema = $(schemaName)
+             and cp.table_name = $(tableName);`,
+          { schemaName, tableName },
+        );
+      },
+    });
+    this.policiesFetcher = new Fetcher({
+      fetch: () => {
+        return db.query(
+            `select *
+               from pg_catalog.pg_policies as p
+               where p.schemaname = $(schemaName)
+                 and p.tablename = $(tableName)
+               order by policyname;`,
+          { schemaName, tableName },
+        );
+      },
+    });
   }
 
   fetchColumns = flow(function* fetchColumns() {
-    const { name: tableName, schemaName, db } = this;
-    const columnsPrivileges = yield db.query(
-        `select *
-           from information_schema.column_privileges as cp
-           where cp.table_schema = $(schemaName)
-             and cp.table_name = $(tableName);`,
-      { schemaName, tableName },
-    );
+    const { name: tableName, schemaName } = this;
+    yield this.columnsFetcher.fetch();
+
+    if (!this.columnsFetcher.inSuccessState) {
+      return;
+    }
+
+    const columnsPrivileges = this.columnsFetcher.result;
 
     this.columns = {};
     this.columnsNames = [];
@@ -58,14 +96,12 @@ class DbTable {
   });
 
   fetchPrivileges = flow(function* fetchPrivileges() {
-    const { name: tableName, schemaName, db } = this;
-    const tablePrivileges = yield db.query(
-        `select *
-           from information_schema.table_privileges as cp
-           where cp.table_schema = $(schemaName)
-             and cp.table_name = $(tableName);`,
-      { schemaName, tableName },
-    );
+    yield this.privilegesFetcher.fetch();
+
+    if (!this.privilegesFetcher.inSuccessState) {
+      return;
+    }
+    const tablePrivileges = this.privilegesFetcher.result;
 
     this.privileges = new DbPrivilegesManager();
 
@@ -84,15 +120,12 @@ class DbTable {
   });
 
   fetchPolicies = flow(function* fetchPolicies() {
-    const { name: tableName, schemaName, db } = this;
-    const policies = yield db.query(
-        `select *
-           from pg_catalog.pg_policies as p
-           where p.schemaname = $(schemaName)
-             and p.tablename = $(tableName)
-           order by policyname;`,
-      { schemaName, tableName },
-    );
+    yield this.policiesFetcher.fetch();
+
+    if (!this.policiesFetcher.inSuccessState) {
+      return;
+    }
+    const policies = this.policiesFetcher.result;
     this.policies = new DbPoliciesManager();
 
     policies.forEach((policy) => {
@@ -109,6 +142,12 @@ class DbTable {
       });
     });
   });
+
+  get isFetched() {
+    return this.columnsFetcher.inSuccessState &&
+      this.privilegesFetcher.inSuccessState &&
+      this.policiesFetcher.inSuccessState;
+  }
 }
 
 decorate(DbTable, {
@@ -116,6 +155,7 @@ decorate(DbTable, {
   columnsNames: observable,
   privileges: observable,
   policies: observable,
+  isFetched: computed,
 });
 
 export default DbTable;

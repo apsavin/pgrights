@@ -91,6 +91,7 @@ class DbTableGrantsForm extends React.Component<Props> {
               rowStyle={{ display: 'flex' }}
             >
               <Column
+                key="name"
                 dataKey="name"
                 label="Column"
                 width={100}
@@ -102,6 +103,7 @@ class DbTableGrantsForm extends React.Component<Props> {
               />
               {dbColumnPrivilegeTypes.map(type => (
                 <Column
+                  key={type}
                   dataKey={type}
                   label={capitalize(type)}
                   width={100}

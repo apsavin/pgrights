@@ -1,7 +1,7 @@
 import { decorate, observable, flow } from 'mobx';
-import pgArray from 'postgres-array';
 import pgpFactory from 'pg-promise';
 import DbSchema from './DbSchema';
+import Fetcher from './Fetcher';
 
 const pgp = pgpFactory();
 
@@ -28,6 +28,26 @@ class DbConnection {
     this.rolesNames = [];
     this.schemas = {};
     this.schemasNames = [];
+
+    this.rolesFetcher = new Fetcher({
+      fetch: () => {
+        const db = this.getDb();
+        return db.query(`
+          select a.rolname, a.oid, array_agg(m.roleid) as parents_oids
+            from pg_roles as a
+                 left join pg_auth_members as m on m.member = a.oid
+            group by a.rolname, a.oid
+            order by a.rolname;
+        `);
+      },
+    });
+
+    this.schemasFetcher = new Fetcher({
+      fetch: () => {
+        const db = this.getDb();
+        return db.query('select * from information_schema.schemata');
+      },
+    });
   }
 
   getDb() {
@@ -39,8 +59,14 @@ class DbConnection {
   }
 
   fetchSchemas = flow(function* fetchSchemas() {
+    yield this.schemasFetcher.fetch();
+
+    if (!this.schemasFetcher.inSuccessState) {
+      return;
+    }
+
+    const schemas = this.schemasFetcher.result;
     const db = this.getDb();
-    const schemas = yield db.query('select * from information_schema.schemata');
 
     this.schemasNames = [];
     this.schemas = {};
@@ -52,14 +78,14 @@ class DbConnection {
   });
 
   fetchRoles = flow(function* fetchSchemas() {
-    const db = this.getDb();
-    const roles = yield db.query(`
-      select a.rolname, a.oid, array_agg(m.roleid) as parents_oids
-        from pg_roles as a
-             left join pg_auth_members as m on m.member = a.oid
-        group by a.rolname, a.oid
-        order by a.rolname;
-    `);
+    yield this.rolesFetcher.fetch();
+
+    if (!this.rolesFetcher.inSuccessState) {
+      return;
+    }
+
+    const roles = this.rolesFetcher.result;
+
     this.roles = {};
     const rolesByIds = {};
 

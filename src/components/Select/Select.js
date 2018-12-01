@@ -26,7 +26,7 @@ type State = {
   value: string,
 };
 
-class Select extends React.Component<Props, State> {
+class Select extends React.PureComponent<Props, State> {
   state = {
     value: this.props.defaultValue,
   };

@@ -16,7 +16,7 @@ class DbRolePicker extends React.Component<Props> {
 
   render() {
     const { dbConnectionsManager } = this.props;
-    const { rolesNames } = dbConnectionsManager.getCurrentConnection();
+    const { rolesNames, rolesFetcher } = dbConnectionsManager.getCurrentConnection();
     const { currentRoleName } = dbConnectionsManager;
 
     return (
@@ -26,6 +26,7 @@ class DbRolePicker extends React.Component<Props> {
         value={currentRoleName}
         onChange={this.handleRoleChange}
         Icon={AccountOutlineIcon}
+        fetcher={rolesFetcher}
       />
     );
   }

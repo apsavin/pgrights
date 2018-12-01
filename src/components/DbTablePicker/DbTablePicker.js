@@ -40,7 +40,7 @@ class DbTablePicker extends React.Component<Props> {
   render() {
     const { classes, dbConnectionsManager } = this.props;
     const { schemasNames } = dbConnectionsManager.getCurrentConnection();
-    const { tablesNames } = dbConnectionsManager.getCurrentSchema();
+    const { tablesNames, tablesFetcher } = dbConnectionsManager.getCurrentSchema();
     const { currentSchemaName, currentTableName } = dbConnectionsManager;
 
     return (
@@ -61,6 +61,7 @@ class DbTablePicker extends React.Component<Props> {
           value={currentTableName}
           Icon={TableLargeIcon}
           onChange={this.handleTableChange}
+          fetcher={tablesFetcher}
         />
       </React.Fragment>
     );

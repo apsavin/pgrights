@@ -9,6 +9,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import classnames from 'classnames';
+import Progress from '../Progress';
+import Fetcher from '../../models/Fetcher';
 
 const styles = theme => ({
   labelWrapper: {
@@ -36,17 +38,21 @@ const styles = theme => ({
     marginRight: theme.spacing.unit,
   },
   selectedListItem: {
-    backgroundColor: theme.palette.action.hover
+    backgroundColor: theme.palette.action.hover,
   },
   filter: {
     width: '100%',
     display: 'flex',
-    marginTop: theme.spacing.unit
+    marginTop: theme.spacing.unit,
   },
   filterInnerShift: {
     paddingLeft: theme.spacing.unit,
     paddingRight: theme.spacing.unit,
-  }
+  },
+  progress: {
+    flexGrow: 1,
+    display: 'flex',
+  },
 });
 
 type Props = {
@@ -56,14 +62,22 @@ type Props = {
   Icon: React.ComponentType<{ fontSize: 'small' }>,
   onChange: (string) => void,
   label: string,
+  fetcher: Fetcher,
 };
 
 class Picker extends React.Component<Props> {
 
+  state = {
+    selectedOptionIndex: 0,
+    filterValue: '',
+    filteredOptions: [],
+    options: [],
+  };
+
   static getDerivedStateFromProps(nextProps, prevState) {
     const { options, value } = nextProps;
 
-    if (prevState && options === prevState.options) {
+    if (options === prevState.options) {
       return null;
     }
 
@@ -179,25 +193,31 @@ class Picker extends React.Component<Props> {
   }
 
   render() {
-    const { classes, label } = this.props;
+    const { classes, label, fetcher } = this.props;
     const { filterValue } = this.state;
 
     return (
-      <React.Fragment>
-        <TextField
-          name="filter"
-          value={filterValue}
-          label={label}
-          onChange={this.handleFilterChange}
-          onKeyDown={this.handleFilterKeyDown}
-          className={classes.filter}
-          inputProps={{ className: classes.filterInnerShift }}
-          InputLabelProps={{ className: classes.filterInnerShift }}
-        />
-        <List className={classes.list}>
-          {this.renderList()}
-        </List>
-      </React.Fragment>
+      fetcher.inLoadingState ? (
+        <div className={classes.progress}>
+          <Progress autoMargin/>
+        </div>
+      ) : (
+        <React.Fragment>
+          <TextField
+            name="filter"
+            value={filterValue}
+            label={label}
+            onChange={this.handleFilterChange}
+            onKeyDown={this.handleFilterKeyDown}
+            className={classes.filter}
+            inputProps={{ className: classes.filterInnerShift }}
+            InputLabelProps={{ className: classes.filterInnerShift }}
+          />
+          <List className={classes.list}>
+            {this.renderList()}
+          </List>
+        </React.Fragment>
+      )
     );
   }
 }

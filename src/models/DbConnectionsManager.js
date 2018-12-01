@@ -49,7 +49,9 @@ class DbConnectionsManager {
   setCurrentSchema = flow(function* setCurrentSchema({ schemaName }) {
     this.currentSchemaName = schemaName;
     const schema = this.getCurrentSchema();
-    yield schema.fetchTables();
+    if (!schema.tablesFetcher.inSuccessState) {
+      yield schema.fetchTables();
+    }
     yield this.setCurrentTable({ tableName: schema.tablesNames[0] });
   }).bind(this);
 
@@ -60,6 +62,9 @@ class DbConnectionsManager {
   setCurrentTable = flow(function* setCurrentTable({ tableName }) {
     this.currentTableName = tableName;
     const table = this.getCurrentTable();
+    if (table.isFetched) {
+      return;
+    }
     yield Promise.all([
       table.fetchColumns(),
       table.fetchPrivileges(),

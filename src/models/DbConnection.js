@@ -1,4 +1,4 @@
-import { decorate, observable, flow } from 'mobx';
+import { decorate, observable, flow, computed } from 'mobx';
 import pgpFactory from 'pg-promise';
 import DbSchema from './DbSchema';
 import Fetcher from './Fetcher';
@@ -100,6 +100,10 @@ class DbConnection {
       this.roles[name].parents = parentsOids.filter(Boolean).map(oid => rolesByIds[oid].name);
     });
   });
+
+  get isFetched() {
+    return this.rolesFetcher.inSuccessState && this.schemasFetcher.inSuccessState;
+  }
 }
 
 decorate(DbConnection, {
@@ -107,6 +111,7 @@ decorate(DbConnection, {
   rolesNames: observable,
   schemas: observable,
   schemasNames: observable,
+  isFetched: computed,
 });
 
 export default DbConnection;

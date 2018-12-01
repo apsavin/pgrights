@@ -83,6 +83,14 @@ class DbConnectionsManager {
   getEditingConnection() {
     return this.connections[this.editingConnectionName];
   }
+
+  get isFetched() {
+    try {
+      this.getCurrentTable().isFetched;
+    } catch (error) {
+      return false;
+    }
+  }
 }
 
 decorate(DbConnectionsManager, {
@@ -99,6 +107,7 @@ decorate(DbConnectionsManager, {
   getCurrentSchema: [boundMethod, computed],
   getCurrentTable: [boundMethod, computed],
   getEditingConnection: [boundMethod, computed],
+  isFetched: computed,
 });
 
 export default DbConnectionsManager;

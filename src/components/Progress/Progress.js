@@ -28,6 +28,7 @@ type Props = {
   classes: $Call<typeof styles>,
   autoMargin?: boolean,
   size: number,
+  className?: string,
 };
 
 class Progress extends React.Component<Props> {
@@ -37,10 +38,10 @@ class Progress extends React.Component<Props> {
   };
 
   render() {
-    const { classes, autoMargin, size } = this.props;
+    const { classes, autoMargin, size, className } = this.props;
 
     return (
-      <div className={classnames(classes.root, { [classes.autoMargin]: autoMargin })}>
+      <div className={classnames(classes.root, className, { [classes.autoMargin]: autoMargin })}>
         <CircularProgress
           variant="determinate"
           value={100}

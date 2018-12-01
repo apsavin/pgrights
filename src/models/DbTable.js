@@ -13,7 +13,7 @@ type DbTablePrivilege = {
   withHierarchy: boolean,
 };
 
-export const dbTablePrivilegeTypes = ['SELECT', 'UPDATE', 'DELETE', 'INSERT', 'REFERENCES', 'TRUNCATE', 'TRIGGER'];
+export const dbTablePrivilegeTypes = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER'];
 
 class DbTable {
   privileges: DbPrivilegesManager<DbTablePrivilege>;

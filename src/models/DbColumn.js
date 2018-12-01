@@ -5,11 +5,11 @@ import DbPrivilegesManager from './DbPrivilegesManager';
 type DbColumnPrivilege = {
   grantor: string,
   grantee: string,
-  type: 'SELECT' | 'UPDATE' | 'DELETE' | 'INSERT' | 'REFERENCES',
+  type: 'SELECT' | 'INSERT' | 'UPDATE' | 'REFERENCES',
   isGrantable: boolean,
 };
 
-export const dbColumnPrivilegeTypes = ['SELECT', 'UPDATE', 'DELETE', 'INSERT', 'REFERENCES'];
+export const dbColumnPrivilegeTypes = ['SELECT', 'INSERT', 'UPDATE', 'REFERENCES'];
 
 class DbColumn {
   privileges: DbPrivilegesManager<DbColumnPrivilege>;

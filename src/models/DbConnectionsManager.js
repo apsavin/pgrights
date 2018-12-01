@@ -76,7 +76,7 @@ class DbConnectionsManager {
     }
   }).bind(this);
 
-  getCurrentTable(): DbTable {
+  getCurrentTable(): ?DbTable {
     return this.getCurrentSchema().tables[this.currentTableName];
   }
 

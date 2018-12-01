@@ -42,7 +42,7 @@ class DbTableRlsForm extends React.Component<Props> {
   renderNoRows = () => {
     const { dbConnectionsManager, classes } = this.props;
     const currentTable = dbConnectionsManager.getCurrentTable();
-    if (!currentTable.policiesFetcher.inSuccessState) {
+    if (!currentTable || !currentTable.policiesFetcher.inSuccessState) {
       return <div className={classes.progress}><Progress/></div>
     }
 
@@ -54,7 +54,18 @@ class DbTableRlsForm extends React.Component<Props> {
     const currentTable = dbConnectionsManager.getCurrentTable();
     const currentConnection = dbConnectionsManager.getCurrentConnection();
     const { currentRoleName: roleName } = dbConnectionsManager;
-    const policiesTableData = currentTable ? getPoliciesTableData(currentConnection, currentTable, roleName) : [];
+    let policiesTableData = [];
+    if (currentTable) {
+      const publicRole = 'public';
+      const publicPolicies = currentTable.policies.getPolicies(publicRole);
+      policiesTableData = [
+        ...getPoliciesTableData(currentConnection, currentTable, roleName),
+        ...publicPolicies.length ? [
+          publicRole,
+          ...publicPolicies,
+        ]: []
+      ];
+    }
     const columns = [
       {
         name: 'name',

@@ -95,7 +95,7 @@ class DbTableGrantsForm extends React.Component<Props> {
   renderNoRows = () => {
     const { dbConnectionsManager, classes } = this.props;
     const currentTable = dbConnectionsManager.getCurrentTable();
-    if (!currentTable.privilegesFetcher.inSuccessState || !currentTable.columnsFetcher.inSuccessState) {
+    if (!currentTable || !currentTable.privilegesFetcher.inSuccessState || !currentTable.columnsFetcher.inSuccessState) {
       return <div className={classes.progress}><Progress/></div>;
     }
 

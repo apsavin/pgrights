@@ -8,7 +8,6 @@ import TextField from '@material-ui/core/TextField';
 import withStyles from '@material-ui/core/styles/withStyles';
 import ModalLayout from '../../components/ModalLayout';
 import type { TDbConnectionData } from '../../models/DbConnection';
-import persistentStorage from '../../persistentStorage';
 
 const styles = () => ({
   secondaryButton: {
@@ -32,10 +31,6 @@ class ConnectionCreatePage extends React.Component<Props> {
       data[key] = value;
     }
 
-    persistentStorage.set('connections', {
-      ...(persistentStorage.get('connections') || {}),
-      [data.name]: data,
-    });
     this.props.addConnection(data);
     this.props.router.toConnectionChoose();
   };

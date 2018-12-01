@@ -1,5 +1,6 @@
 import * as React from 'react';
-import { inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
+import { withSnackbar } from 'notistack';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -12,6 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import EditIcon from 'mdi-material-ui/Pencil';
 import type Router from '../../models/Router';
+import type DbConnectionsManager from '../../models/DbConnectionsManager';
 import ModalLayout from '../../components/ModalLayout';
 import Progress from '../../components/Progress';
 
@@ -24,11 +26,8 @@ const styles = () => ({
 });
 
 type Props = {
-  connectionsNames: Array<string>,
-  connect: ({ connectionName: string }) => Promise<void>,
-  setEditingConnectionName: (string) => void,
-  isFetched: boolean,
-  currentConnectionName: string,
+  dbConnectionsManager: DbConnectionsManager,
+  enqueueSnackbar: (string, Object) => void,
   router: Router
 };
 
@@ -42,22 +41,30 @@ class ConnectionChoosePage extends React.Component<Props> {
   }
 
   async handleChoose(connectionName) {
-    const { router, connect } = this.props;
+    const { router, dbConnectionsManager, enqueueSnackbar } = this.props;
     this.timer = setTimeout(() => {
       this.setState({ delayPassed: true });
     }, 300);
-    await connect({ connectionName });
-    router.toRights();
+    await dbConnectionsManager.connect({ connectionName });
+    if (!dbConnectionsManager.error) {
+      router.toRights();
+    } else {
+      clearTimeout(this.timer);
+      enqueueSnackbar(dbConnectionsManager.error.message, {
+        variant: 'error',
+      });
+    }
   }
 
   handleEdit(name) {
-    const { router, setEditingConnectionName } = this.props;
-    setEditingConnectionName(name);
+    const { router, dbConnectionsManager } = this.props;
+    dbConnectionsManager.setEditingConnectionName(name);
     router.toConnectionEdit();
   }
 
   renderConnections() {
-    const { connectionsNames, currentConnectionName, isFetched, classes } = this.props;
+    const { dbConnectionsManager, classes } = this.props;
+    const { connectionsNames, currentConnectionName, isFetched } = dbConnectionsManager;
     const { delayPassed } = this.state;
 
     return connectionsNames.map((name) => {
@@ -97,10 +104,6 @@ class ConnectionChoosePage extends React.Component<Props> {
   }
 }
 
-export default inject(({ dbConnectionsManager }) => ({
-  connect: dbConnectionsManager.connect,
-  setEditingConnectionName: dbConnectionsManager.setEditingConnectionName,
-  connectionsNames: dbConnectionsManager.connectionsNames,
-  isFetched: dbConnectionsManager.isFetched,
-  currentConnectionName: dbConnectionsManager.currentConnectionName,
-}))(withStyles(styles)(ConnectionChoosePage));
+export default withSnackbar(inject(({ dbConnectionsManager }) => ({
+  dbConnectionsManager,
+}))(observer(withStyles(styles)(ConnectionChoosePage))));

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { observer, Provider } from 'mobx-react';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { SnackbarProvider } from 'notistack';
 
 import routes from './constants/routes';
 
@@ -53,7 +54,9 @@ class App extends React.Component<Props> {
       <React.Fragment>
         <CssBaseline/>
         <Provider dbConnectionsManager={dbConnectionsManager}>
-          {this.renderPage()}
+          <SnackbarProvider anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+            {this.renderPage()}
+          </SnackbarProvider>
         </Provider>
       </React.Fragment>
     );

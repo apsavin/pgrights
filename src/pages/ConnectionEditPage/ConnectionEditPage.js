@@ -32,11 +32,8 @@ class ConnectionEditPage extends React.Component<Props> {
       data[key] = value;
     }
 
-    const { connection, addConnection } = this.props;
+    const { addConnection } = this.props;
 
-    // TODO: implement
-    // await sendRequest({ action: apiActions.removeConnection, data: { name: connection.name } });
-    // await sendRequest({ action: apiActions.updateConnection, data });
     addConnection(data);
     this.props.router.toConnectionChoose();
   };
@@ -71,7 +68,7 @@ class ConnectionEditPage extends React.Component<Props> {
             </Grid>
             <Grid item xs={12}>
               <Button variant="contained" color="primary" type="submit">
-                Create
+                Save
               </Button>
               <Button
                 variant="outlined"

@@ -1,5 +1,6 @@
 import { decorate, observable, flow, action, computed } from 'mobx';
 import { boundMethod } from 'autobind-decorator'
+import persistentStorage from '../persistentStorage';
 import DbConnection from './DbConnection';
 import type { TDbConnectionData } from './DbConnection';
 import DbTable from './DbTable';
@@ -14,17 +15,27 @@ class DbConnectionsManager {
     this.currentRoleName = '';
     this.connections = {};
     this.connectionsNames = [];
+    this.error = '';
   }
 
-  addConnection(connectionData: TDbConnectionData) {
+  addConnection(connectionData: TDbConnectionData, updateStorage = true) {
     const connection = new DbConnection(connectionData);
+    const rewrite = this.connections[connection.name];
     this.connections[connection.name] = connection;
-    this.connectionsNames.push(connection.name);
+    if (updateStorage) {
+      persistentStorage.set('connections', {
+        ...(persistentStorage.get('connections') || {}),
+        [connection.name]: connection,
+      });
+    }
+    if (!rewrite) {
+      this.connectionsNames.push(connection.name);
+    }
   }
 
   addConnections(connectionsData) {
     Object.keys(connectionsData).forEach(key => {
-      this.addConnection(connectionsData[key]);
+      this.addConnection(connectionsData[key], false);
     });
   }
 
@@ -35,8 +46,15 @@ class DbConnectionsManager {
   connect = flow(function* connect({ connectionName }) {
     this.currentConnectionName = connectionName;
     const connection = this.getCurrentConnection();
-    yield connection.fetchSchemas();
-    yield connection.fetchRoles();
+    yield Promise.all([
+      connection.fetchSchemas(),
+      connection.fetchRoles(),
+    ]);
+    if (!connection.isFetched) {
+      this.currentConnectionName = '';
+      this.error = connection.schemasFetcher.error || connection.rolesFetcher.error;
+      return;
+    }
     this.currentRoleName = connection.user;
     const firstSchemaName = connection.schemasNames.find((name) => name === 'public') || connection.schemasNames[0];
     yield this.setCurrentSchema({ schemaName: firstSchemaName });
@@ -52,7 +70,10 @@ class DbConnectionsManager {
     if (!schema.tablesFetcher.inSuccessState) {
       yield schema.fetchTables();
     }
-    yield this.setCurrentTable({ tableName: schema.tablesNames[0] });
+    this.error = schema.tablesFetcher.error;
+    if (schema.tablesNames.length) {
+      yield this.setCurrentTable({ tableName: schema.tablesNames[0] });
+    }
   }).bind(this);
 
   getCurrentTable(): DbTable {
@@ -70,6 +91,7 @@ class DbConnectionsManager {
       table.fetchPrivileges(),
       table.fetchPolicies(),
     ]);
+    this.error = table.columnsFetcher.error || table.privilegesFetcher.error || table.policiesFetcher.error;
   }).bind(this);
 
   setCurrentRole = flow(function* setCurrentRole({ roleName }) {

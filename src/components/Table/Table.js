@@ -17,6 +17,7 @@ type Props = {
   columns: Array<{ name: string, header: React.Node }>,
   data: Array<mixed>,
   rowRenderer?: (mixed) => React.Node,
+  noRowsRenderer?: (mixed) => React.Node,
   rowKey: (mixed) => string,
 };
 
@@ -38,7 +39,7 @@ class Table extends React.Component<Props> {
   };
 
   render() {
-    const { columns, data, classes, rowRenderer = this.rowRenderer, rowKey } = this.props;
+    const { columns, data, classes, rowRenderer = this.rowRenderer, rowKey, noRowsRenderer } = this.props;
 
     return (
       <MuiTable padding="checkbox" className={classes.table}>
@@ -61,6 +62,13 @@ class Table extends React.Component<Props> {
               );
             })
           }
+          {noRowsRenderer && !data.length && (
+            <TableRow>
+              <TableCell colSpan={columns.length}>
+                {noRowsRenderer()}
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </MuiTable>
     );

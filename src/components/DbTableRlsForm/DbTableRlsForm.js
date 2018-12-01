@@ -7,8 +7,15 @@ import Tooltip from '@material-ui/core/Tooltip';
 import TableCell from '@material-ui/core/TableCell';
 import Table from '../Table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
+import Progress from '../Progress';
 
-const styles = theme => ({});
+const styles = () => ({
+  progress: {
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'column',
+  }
+});
 
 type Props = {
   classes: $Call<typeof styles>,
@@ -31,6 +38,16 @@ function getPoliciesTableData(currentConnection, currentTable, roleName) {
 }
 
 class DbTableRlsForm extends React.Component<Props> {
+
+  renderNoRows = () => {
+    const { dbConnectionsManager, classes } = this.props;
+    const currentTable = dbConnectionsManager.getCurrentTable();
+    if (!currentTable.policiesFetcher.inSuccessState) {
+      return <div className={classes.progress}><Progress/></div>
+    }
+
+    return <Typography variant="subtitle2" align="center">No policies found</Typography>;
+  };
 
   render() {
     const { dbConnectionsManager, classes } = this.props;
@@ -102,6 +119,7 @@ class DbTableRlsForm extends React.Component<Props> {
           );
         }}
         rowKey={(tableRow, i) => `${tableRow.name || tableRow}_${i}`}
+        noRowsRenderer={this.renderNoRows}
       />
     );
   }

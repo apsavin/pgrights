@@ -10,8 +10,15 @@ import TableCell from '@material-ui/core/TableCell';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 import { dbColumnPrivilegeTypes } from '../../models/DbColumn';
 import { dbTablePrivilegeTypes } from '../../models/DbTable';
+import Progress from '../Progress';
 
-const styles = theme => ({});
+const styles = () => ({
+  progress: {
+    display: 'flex',
+    alignItems: 'center',
+    flexDirection: 'column',
+  }
+});
 
 type Props = {
   classes: $Call<typeof styles>,
@@ -27,7 +34,7 @@ function headerRenderer({ dataKey, label }) {
       display: 'flex',
       alignItems: 'center',
     }}>
-      <Typography variant="h6">{label}</Typography>
+      <Typography variant="subtitle2">{label}</Typography>
     </TableCell>
   );
 }
@@ -44,6 +51,16 @@ const columnRenderer = ({ cellData }) => (
 );
 
 class DbTableGrantsForm extends React.Component<Props> {
+
+  renderNoRows = () => {
+    const { dbConnectionsManager, classes } = this.props;
+    const currentTable = dbConnectionsManager.getCurrentTable();
+    if (!currentTable.privilegesFetcher.inSuccessState || !currentTable.columnsFetcher.inSuccessState) {
+      return <div className={classes.progress}><Progress/></div>
+    }
+
+    return <Typography variant="h6" align="center">No columns found</Typography>;
+  };
 
   render() {
     const { dbConnectionsManager } = this.props;
@@ -65,7 +82,7 @@ class DbTableGrantsForm extends React.Component<Props> {
 
     const heightOfCell = 49;
     const totalHeight = grantedData.length * heightOfCell;
-    const height = totalHeight > 500 ? 500 : totalHeight;
+    const height = (totalHeight > 500 ? 500 : totalHeight) || 142;
 
     return (
       <React.Fragment>
@@ -89,6 +106,7 @@ class DbTableGrantsForm extends React.Component<Props> {
               rowCount={grantedData.length}
               rowGetter={({ index }) => grantedData[index]}
               rowStyle={{ display: 'flex' }}
+              noRowsRenderer={this.renderNoRows}
             >
               <Column
                 key="name"

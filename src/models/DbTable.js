@@ -18,8 +18,9 @@ export const dbTablePrivilegeTypes = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'T
 class DbTable {
   privileges: DbPrivilegesManager<DbTablePrivilege>;
 
-  constructor({ name, db, schemaName }) {
+  constructor({ name, isRlsEnabled, db, schemaName }) {
     this.name = name;
+    this.isRlsEnabled = isRlsEnabled;
     this.db = db;
     this.schemaName = schemaName;
     this.columns = {};

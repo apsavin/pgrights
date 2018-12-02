@@ -11,7 +11,8 @@ class DbSchema {
     this.tablesFetcher = new Fetcher({
       fetch() {
         return db.query(
-          'select t.* from information_schema.tables as t where t.table_schema = $(schemaName) order by t.table_name;',
+          `select t.* from pg_catalog.pg_tables as t 
+           where t.schemaname = $(schemaName) order by t.tablename;`,
           { schemaName: name },
         );
       }
@@ -32,9 +33,9 @@ class DbSchema {
 
     const tables = this.tablesFetcher.result;
 
-    tables.forEach(({ table_name: name }) => {
+    tables.forEach(({ tablename: name, rowsecurity: isRlsEnabled }) => {
       this.tablesNames.push(name);
-      this.tables[name] = new DbTable({ name, db, schemaName });
+      this.tables[name] = new DbTable({ name, isRlsEnabled, db, schemaName });
     });
   });
 }

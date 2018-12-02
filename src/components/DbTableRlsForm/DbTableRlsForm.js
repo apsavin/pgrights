@@ -1,6 +1,9 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import withStyles from '@material-ui/core/styles/withStyles';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Divider from '@material-ui/core/Divider';
 import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -9,12 +12,20 @@ import Table from '../Table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 import Progress from '../Progress';
 
-const styles = () => ({
+const styles = (theme) => ({
   progress: {
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
-  }
+  },
+  tableRlsWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing.unit * 2,
+  },
+  tableRlsLabel: {
+    paddingRight: theme.spacing.unit,
+  },
 });
 
 type Props = {
@@ -43,7 +54,7 @@ class DbTableRlsForm extends React.Component<Props> {
     const { dbConnectionsManager, classes } = this.props;
     const currentTable = dbConnectionsManager.getCurrentTable();
     if (!currentTable || !currentTable.policiesFetcher.inSuccessState) {
-      return <div className={classes.progress}><Progress/></div>
+      return <div className={classes.progress}><Progress/></div>;
     }
 
     return <Typography variant="subtitle2" align="center">No policies found</Typography>;
@@ -63,7 +74,7 @@ class DbTableRlsForm extends React.Component<Props> {
         ...publicPolicies.length ? [
           publicRole,
           ...publicPolicies,
-        ]: []
+        ] : [],
       ];
     }
     const columns = [
@@ -106,32 +117,46 @@ class DbTableRlsForm extends React.Component<Props> {
       },
     ];
 
+    const isRlsEnabled = currentTable && currentTable.isRlsEnabled;
+
     return (
-      <Table
-        data={policiesTableData}
-        columns={columns}
-        rowRenderer={(tableRow) => {
-          if (typeof tableRow === 'string') {
+      <React.Fragment>
+        <div className={classes.tableRlsWrapper}>
+          <Typography variant="h6" className={classes.tableRlsLabel}>Table:</Typography>
+          <FormGroup row>
+            <FormControlLabel
+              control={<Checkbox checked={isRlsEnabled}/>}
+              label={`Row-level security ${isRlsEnabled ? 'enabled' : 'disabled'}`}
+            />
+          </FormGroup>
+        </div>
+        <Divider/>
+        <Table
+          data={policiesTableData}
+          columns={columns}
+          rowRenderer={(tableRow) => {
+            if (typeof tableRow === 'string') {
+              return (
+                <TableCell colSpan={columns.length}>
+                  Inherited from <b>{tableRow}</b>
+                </TableCell>
+              );
+            }
             return (
-              <TableCell colSpan={columns.length}>
-                Inherited from <b>{tableRow}</b>
-              </TableCell>
+              <React.Fragment>
+                {columns.map(column => {
+                  const { cell = (data) => data[column.name] } = column;
+                  return (
+                    <TableCell key={column.name}>{cell(tableRow)}</TableCell>
+                  );
+                })}
+              </React.Fragment>
             );
-          }
-          return (
-            <React.Fragment>
-              {columns.map(column => {
-                const { cell = (data) => data[column.name] } = column;
-                return (
-                  <TableCell key={column.name}>{cell(tableRow)}</TableCell>
-                );
-              })}
-            </React.Fragment>
-          );
-        }}
-        rowKey={(tableRow, i) => `${tableRow.name || tableRow}_${i}`}
-        noRowsRenderer={this.renderNoRows}
-      />
+          }}
+          rowKey={(tableRow, i) => `${tableRow.name || tableRow}_${i}`}
+          noRowsRenderer={this.renderNoRows}
+        />
+      </React.Fragment>
     );
   }
 }

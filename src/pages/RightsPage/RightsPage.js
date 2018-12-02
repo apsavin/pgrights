@@ -36,7 +36,7 @@ const styles = theme => ({
     width: '100%',
     overflow: 'auto',
   },
-  grantsPanel: {
+  centerPanel: {
     flexDirection: 'column',
   },
 });
@@ -80,7 +80,7 @@ class RightsPage extends React.Component<Props> {
                   Granted permissions
                 </Typography>
               </ExpansionPanelSummary>
-              <ExpansionPanelDetails className={classes.grantsPanel}>
+              <ExpansionPanelDetails className={classes.centerPanel}>
                 <DbTableGrantsForm dbConnectionsManager={dbConnectionsManager}/>
               </ExpansionPanelDetails>
             </ExpansionPanel>
@@ -90,7 +90,7 @@ class RightsPage extends React.Component<Props> {
                   Row level security
                 </Typography>
               </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
+              <ExpansionPanelDetails className={classes.centerPanel}>
                 <DbTableRlsForm dbConnectionsManager={dbConnectionsManager}/>
               </ExpansionPanelDetails>
             </ExpansionPanel>

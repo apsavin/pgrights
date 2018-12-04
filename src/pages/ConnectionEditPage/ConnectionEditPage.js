@@ -34,7 +34,7 @@ class ConnectionEditPage extends React.Component<Props> {
 
     const { addConnection } = this.props;
 
-    addConnection(data);
+    await addConnection(data);
     this.props.router.toConnectionChoose();
   };
 

@@ -31,7 +31,7 @@ class ConnectionCreatePage extends React.Component<Props> {
       data[key] = value;
     }
 
-    this.props.addConnection(data);
+    await this.props.addConnection(data);
     this.props.router.toConnectionChoose();
   };
 

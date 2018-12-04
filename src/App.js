@@ -23,7 +23,7 @@ class App extends React.Component<Props> {
     const { router } = this.props;
 
     if (persistentStorage.store.connections) {
-      dbConnectionsManager.addConnections(persistentStorage.store.connections);
+      dbConnectionsManager.addConnections(persistentStorage.store.connections, true);
       router.toConnectionChoose();
     }
   }

@@ -1,4 +1,5 @@
 import { decorate, observable, flow, computed } from 'mobx';
+import keytar from 'keytar';
 import pgpFactory from 'pg-promise';
 import DbSchema from './DbSchema';
 import Fetcher from './Fetcher';
@@ -30,8 +31,8 @@ class DbConnection {
     this.schemasNames = [];
 
     this.rolesFetcher = new Fetcher({
-      fetch: () => {
-        const db = this.getDb();
+      fetch: async () => {
+        const db = await this.getDb();
         return db.query(`
           select a.rolname, a.oid, array_agg(m.roleid) as parents_oids
             from pg_roles as a
@@ -43,16 +44,17 @@ class DbConnection {
     });
 
     this.schemasFetcher = new Fetcher({
-      fetch: () => {
-        const db = this.getDb();
+      fetch: async () => {
+        const db = await this.getDb();
         return db.query('select * from information_schema.schemata');
       },
     });
   }
 
-  getDb() {
+  async getDb() {
     if (!this.db) {
-      const { database, host, port, user, password } = this;
+      const { database, host, port, user } = this;
+      const password = this.password || await keytar.getPassword(this.name, user);
       this.db = pgp({ database, host, port, user, password });
     }
     return this.db;
@@ -66,7 +68,7 @@ class DbConnection {
     }
 
     const schemas = this.schemasFetcher.result;
-    const db = this.getDb();
+    const db = yield this.getDb();
 
     this.schemasNames = [];
     this.schemas = {};

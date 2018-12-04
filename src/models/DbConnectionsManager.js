@@ -1,5 +1,6 @@
 import { decorate, observable, flow, action, computed } from 'mobx';
 import { boundMethod } from 'autobind-decorator'
+import keytar from 'keytar';
 import persistentStorage from '../persistentStorage';
 import DbConnection from './DbConnection';
 import type { TDbConnectionData } from './DbConnection';
@@ -18,24 +19,26 @@ class DbConnectionsManager {
     this.error = '';
   }
 
-  addConnection(connectionData: TDbConnectionData, updateStorage = true) {
+  addConnection(connectionData: TDbConnectionData, fromStorage = false) {
+    const { password, ...publicConnectionData } = connectionData;
     const connection = new DbConnection(connectionData);
     const rewrite = this.connections[connection.name];
     this.connections[connection.name] = connection;
-    if (updateStorage) {
-      persistentStorage.set('connections', {
-        ...(persistentStorage.get('connections') || {}),
-        [connection.name]: connection,
-      });
-    }
     if (!rewrite) {
       this.connectionsNames.push(connection.name);
     }
+    if (!fromStorage) {
+      persistentStorage.set('connections', {
+        ...(persistentStorage.get('connections') || {}),
+        [connection.name]: publicConnectionData,
+      });
+      return keytar.setPassword(connectionData.name, connectionData.user, password);
+    }
   }
 
-  addConnections(connectionsData) {
+  addConnections(connectionsData, fromStorage) {
     Object.keys(connectionsData).forEach(key => {
-      this.addConnection(connectionsData[key], false);
+      this.addConnection(connectionsData[key], fromStorage);
     });
   }
 

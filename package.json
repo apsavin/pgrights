@@ -1,8 +1,65 @@
 {
   "name": "pgrights",
+  "productName": "pgrights",
+  "description": "GUI for PostgreSQL roles, privileges and policies",
   "version": "0.1.0",
   "private": true,
   "main": "./src/main.prod.js",
+  "build": {
+    "productName": "pgrights",
+    "appId": "pgrights",
+    "files": [
+      "src/dist/",
+      "src/app.html",
+      "src/main.prod.js",
+      "src/main.prod.js.map",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "msi"
+      ]
+    },
+    "linux": {
+      "target": [
+        "deb",
+        "rpm",
+        "snap",
+        "AppImage"
+      ],
+      "category": "Development"
+    },
+    "directories": {
+      "buildResources": "resources",
+      "output": "release"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "apsavin",
+      "repo": "pgrights",
+      "private": false
+    }
+  },
+  "homepage": "./",
+  "author": {
+    "name": "Alexander Savin",
+    "email": "box.for.postman@gmail.com"
+  },
   "dependencies": {
     "@material-ui/core": "^3.6.0",
     "autobind-decorator": "^2.2.1",
@@ -26,7 +83,6 @@
     "react-dom": "^16.6.0",
     "react-hot-loader": "^4.3.4",
     "react-panelgroup": "^1.0.7",
-    "react-scripts": "2.1.1",
     "react-virtualized": "^9.21.0",
     "source-map-support": "^0.5.6"
   },
@@ -39,6 +95,11 @@
     "build-e2e": "cross-env E2E_BUILD=true yarn build",
     "build-main": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.main.prod.babel.js --colors",
     "build-renderer": "cross-env NODE_ENV=production webpack --config ./configs/webpack.config.renderer.prod.babel.js --colors",
+    "package": "yarn build && electron-builder build --publish never",
+    "package-all": "yarn build && electron-builder build -mwl",
+    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
+    "package-linux": "yarn build && electron-builder build --linux",
+    "package-win": "yarn build && electron-builder build --win --x64",
     "dev": "cross-env START_HOT=1 node -r @babel/register ./internals/scripts/CheckPortInUse.js && cross-env START_HOT=1 yarn start-renderer-dev",
     "test": "cross-env NODE_ENV=test BABEL_DISABLE_CACHE=1 jest",
     "test-all": "yarn lint && yarn flow && yarn build && yarn test && yarn build-e2e && yarn test-e2e",
@@ -91,6 +152,8 @@
     "eslint-plugin-promise": "^3.8.0",
     "eslint-plugin-react": "^7.10.0",
     "eslint-plugin-testcafe": "^0.2.1",
+    "mini-css-extract-plugin": "^0.4.5",
+    "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "^1.14.3",
     "wait-on": "^3.1.0",
     "webpack": "^4.20.2",

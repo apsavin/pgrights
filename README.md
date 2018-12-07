@@ -1,6 +1,8 @@
 # pgrights
 GUI for PostgreSQL roles, privileges and policies
 
+![Main view](https://user-images.githubusercontent.com/632171/49671690-bdf90300-fa79-11e8-979f-0de5fe4bdd69.png)
+
 ## RoadMap
 
 - [ ] 1.0.0

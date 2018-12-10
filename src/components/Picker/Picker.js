@@ -156,7 +156,7 @@ class Picker extends React.Component<Props> {
             <ListItemText
               primary={option}
               className={classes.labelWrapper}
-              primaryTypographyProps={{ className: classes.label }}
+              primaryTypographyProps={{ className: classes.label, noWrap: true }}
             />
           </Tooltip>
         </ListItem>

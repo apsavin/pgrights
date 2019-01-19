@@ -76,7 +76,7 @@ class RightsPage extends React.Component<Props> {
           <Paper square elevation={0} className={classes.centerWrapper}>
             <ExpansionPanel defaultExpanded>
               <ExpansionPanelSummary expandIcon={<ChevronDownIcon/>}>
-                <Typography variant="h4">
+                <Typography variant="h5">
                   Granted permissions
                 </Typography>
               </ExpansionPanelSummary>
@@ -86,7 +86,7 @@ class RightsPage extends React.Component<Props> {
             </ExpansionPanel>
             <ExpansionPanel defaultExpanded>
               <ExpansionPanelSummary expandIcon={<ChevronDownIcon/>}>
-                <Typography variant="h4">
+                <Typography variant="h5">
                   Row level security
                 </Typography>
               </ExpansionPanelSummary>

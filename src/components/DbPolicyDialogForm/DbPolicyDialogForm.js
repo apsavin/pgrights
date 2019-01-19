@@ -161,10 +161,10 @@ class DbPolicyDialogForm extends React.Component<Props> {
             </Grid>
           </DialogContent>
           <DialogActions>
-            <Button type="submit" color="primary">
+            <Button variant="contained" type="submit" color="primary">
               Save
             </Button>
-            <Button onClick={onClose} color="secondary">
+            <Button variant="outlined" onClick={onClose} color="primary">
               Cancel
             </Button>
           </DialogActions>

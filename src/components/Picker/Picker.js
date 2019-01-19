@@ -8,7 +8,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
-import classnames from 'classnames';
 import Progress from '../Progress';
 import Fetcher from '../../models/Fetcher';
 
@@ -36,9 +35,6 @@ const styles = theme => ({
   },
   listItemIcon: {
     marginRight: theme.spacing.unit,
-  },
-  selectedListItem: {
-    backgroundColor: theme.palette.action.hover,
   },
   filter: {
     width: '100%',
@@ -133,31 +129,32 @@ class Picker extends React.Component<Props> {
   };
 
   renderList() {
-    const { classes, value, Icon } = this.props;
+    const { classes, Icon } = this.props;
     const { filteredOptions } = this.state;
     const { selectedOptionIndex } = this.state;
 
     const rowRenderer = ({ key, index, style }) => {
       const option = filteredOptions[index];
+      const isSelected = index === selectedOptionIndex;
+      const color = isSelected ? 'primary' : undefined;
 
       return (
         <ListItem
           dense
           button
           onClick={() => this.chooseOption({ option, index })}
-          selected={option === value}
-          className={classnames(classes.listItem, { [classes.selectedListItem]: index === selectedOptionIndex })}
+          className={classes.listItem}
           key={key}
           style={style}
         >
           <ListItemIcon className={classes.listItemIcon}>
-            <Icon fontSize="small"/>
+            <Icon fontSize="small" color={color}/>
           </ListItemIcon>
           <Tooltip title={option}>
             <ListItemText
               primary={option}
               className={classes.labelWrapper}
-              primaryTypographyProps={{ className: classes.label, noWrap: true }}
+              primaryTypographyProps={{ className: classes.label, noWrap: true, color }}
             />
           </Tooltip>
         </ListItem>

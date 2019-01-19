@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { observer, Provider } from 'mobx-react';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { SnackbarProvider } from 'notistack';
 
 import routes from './constants/routes';
@@ -13,6 +14,15 @@ import RightsPage from './pages/RightsPage';
 import persistentStorage from './persistentStorage';
 import { dbConnectionsManager } from './data';
 import ConnectionEditPage from './pages/ConnectionEditPage';
+
+const primaryColor = '#5f92f7';
+
+const theme = createMuiTheme({
+  palette: {
+    primary: { main: primaryColor },
+    secondary: { main: primaryColor },
+  },
+});
 
 type Props = {
   router: Router,
@@ -55,7 +65,9 @@ class App extends React.Component<Props> {
         <CssBaseline/>
         <Provider dbConnectionsManager={dbConnectionsManager}>
           <SnackbarProvider anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-            {this.renderPage()}
+            <MuiThemeProvider theme={theme}>
+              {this.renderPage()}
+            </MuiThemeProvider>
           </SnackbarProvider>
         </Provider>
       </React.Fragment>

@@ -14,7 +14,7 @@ const styles = theme => ({
     margin: 'auto'
   },
   background: {
-    color: theme.palette.primary.dark,
+    color: theme.palette.primary.main,
   },
   foreground: {
     color: lighten(theme.palette.primary.light, 0.4),

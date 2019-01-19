@@ -106,6 +106,15 @@ class DbTableGrantsForm extends React.Component<Props> {
     const { dbConnectionsManager, classes } = this.props;
     const currentTable = dbConnectionsManager.getCurrentTable();
     const grantee = dbConnectionsManager.currentRoleName;
+
+    if (dbConnectionsManager.getCurrentConnection().roles[grantee].isSuperUser) {
+      return (
+        <Typography variant="h6" className={classes.tableGrantsLabel}>
+          Selected role is SUPERUSER and bypasses permissions
+        </Typography>
+      );
+    }
+
     const grantedData = currentTable ? currentTable.columnsNames.map(columnName => {
       const column = currentTable.columns[columnName];
       return {

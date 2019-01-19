@@ -95,6 +95,14 @@ class DbTableRlsForm extends React.Component<Props, State> {
     const currentTable = dbConnectionsManager.getCurrentTable();
     const currentConnection = dbConnectionsManager.getCurrentConnection();
     const { currentRoleName: roleName } = dbConnectionsManager;
+    const currentRole = currentConnection.roles[roleName];
+
+    if (currentRole.bypassRLS) {
+      return (
+        <Typography variant="h6" className={classes.tableGrantsLabel}>Selected role bypasses RLS</Typography>
+      );
+    }
+
     let policiesTableData = [];
     if (currentTable) {
       const publicRole = 'public';

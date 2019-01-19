@@ -34,10 +34,10 @@ class DbConnection {
       fetch: async () => {
         const db = await this.getDb();
         return db.query(`
-          select a.rolname, a.oid, array_agg(m.roleid) as parents_oids
+          select a.rolname, a.oid, a.rolsuper, a.rolbypassrls, array_agg(m.roleid) as parents_oids
             from pg_roles as a
                  left join pg_auth_members as m on m.member = a.oid
-            group by a.rolname, a.oid
+            group by a.rolname, a.oid, a.rolsuper, a.rolbypassrls
             order by a.rolname;
         `);
       },
@@ -92,8 +92,8 @@ class DbConnection {
     const rolesByIds = {};
 
     roles.forEach((role) => {
-      const { rolname: name, oid } = role;
-      this.roles[name] = { oid, name };
+      const { rolname: name, oid, rolsuper, rolbypassrls } = role;
+      this.roles[name] = { oid, name, isSuperUser: rolsuper, bypassRLS: rolbypassrls };
       rolesByIds[oid] = this.roles[name];
     });
     this.rolesNames = Object.keys(this.roles);

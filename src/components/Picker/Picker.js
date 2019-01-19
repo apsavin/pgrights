@@ -102,9 +102,10 @@ class Picker extends React.Component<Props> {
   handleFilterChange = (event) => {
     const { options } = this.props;
     const { value } = event.target;
+    const matcher = new RegExp(value, 'i');
     this.setState({
       filterValue: value,
-      filteredOptions: options.filter(option => option.includes(value)),
+      filteredOptions: options.filter(option => matcher.test(option)),
       selectedOptionIndex: 0,
     });
   };

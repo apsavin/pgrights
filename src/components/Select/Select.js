@@ -15,12 +15,20 @@ const styles = theme => ({
 });
 
 type Props = {
-  value: string,
-  defaultValue: string,
+  fullWidth?: boolean,
+  value?: string,
+  defaultValue?: string,
   classes: $Call<typeof styles>,
-  children: React.Node,
-  onChange: (Event) => void,
-  className: string,
+  name?: string,
+  label: string,
+  onChange?: (Event) => void,
+  className?: string,
+  labelKeyName?: string,
+  valueKeyName?: string,
+  dataForOptions: Array<string> | Array<{
+    [$ElementType<Props, 'labelKeyName'>]: string,
+    [$ElementType<Props, 'valueKeyName'>]: string,
+  }>
 };
 type State = {
   value: string,
@@ -39,12 +47,13 @@ class Select extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { classes, dataForOptions, labelKeyName, valueKeyName, name, id, label, className } = this.props;
+    const { classes, dataForOptions, labelKeyName, valueKeyName, name, id, label, className, fullWidth } = this.props;
 
     return (
       <FormControl className={className}>
         <InputLabel htmlFor={id} className={classes.label}>{label}</InputLabel>
         <MuiSelect
+          fullWidth={fullWidth}
           value={this.props.value || this.state.value}
           onChange={this.handleChange}
           inputProps={{ name, id }}

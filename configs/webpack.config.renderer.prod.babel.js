@@ -8,7 +8,7 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import OptimizeCSSAssetsPlugin from 'optimize-css-assets-webpack-plugin';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 import merge from 'webpack-merge';
-import UglifyJSPlugin from 'uglifyjs-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
 
@@ -48,9 +48,15 @@ export default merge.smart(baseConfig, {
           }
         ]
       },
+      {
+        test: /\.css$/,
+        include: /monaco-editor/,
+        use: ['style-loader', 'css-loader']
+      },
       // Pipe other styles through css modules and append to style.css
       {
         test: /^((?!\.global).)*\.css$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
@@ -172,7 +178,7 @@ export default merge.smart(baseConfig, {
     minimizer: process.env.E2E_BUILD
       ? []
       : [
-          new UglifyJSPlugin({
+          new TerserPlugin({
             parallel: true,
             sourceMap: true,
             cache: true

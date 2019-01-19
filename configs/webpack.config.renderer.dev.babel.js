@@ -84,7 +84,13 @@ export default merge.smart(baseConfig, {
         ]
       },
       {
+        test: /\.css$/,
+        include: /monaco-editor/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
         test: /^((?!\.global).)*\.css$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'style-loader'

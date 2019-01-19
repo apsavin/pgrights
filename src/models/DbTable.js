@@ -4,6 +4,7 @@ import DbColumn from './DbColumn';
 import DbPrivilegesManager from './DbPrivilegesManager';
 import DbPoliciesManager from './DbPoliciesManager';
 import Fetcher from './Fetcher';
+import DbPolicy from './DbPolicy';
 
 type DbTablePrivilege = {
   grantor: string,
@@ -129,18 +130,30 @@ class DbTable {
     const policies = this.policiesFetcher.result;
     this.policies = new DbPoliciesManager();
 
-    policies.forEach((policy) => {
+    policies.forEach((policyData) => {
       const {
-        policyname: name, permissive, cmd: command, qual: qualifier, with_check: check, roles,
-      } = policy;
-      this.policies.add({
+        policyname: name,
+        permissive,
+        cmd: command,
+        qual: qualifier,
+        with_check: check,
+        roles,
+        schemaname: schemaName,
+        tablename: tableName,
+      } = policyData;
+      const policy = new DbPolicy({
         name,
         permissive: permissive === 'PERMISSIVE',
         command,
         qualifier,
         check,
         roles: pgArray.parse(roles),
+        schemaName,
+        tableName,
+        db: this.db,
       });
+
+      this.policies.add(policy);
     });
   });
 

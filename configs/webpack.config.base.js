@@ -5,9 +5,10 @@
 import path from 'path';
 import webpack from 'webpack';
 import { dependencies } from '../package.json';
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 
 export default {
-  externals: [...Object.keys(dependencies || {})],
+  externals: [...Object.keys(dependencies || {}).filter(d => d !== 'react-monaco-editor')],
 
   module: {
     rules: [
@@ -38,10 +39,13 @@ export default {
   },
 
   plugins: [
+    new MonacoWebpackPlugin({
+      // available options are documented at https://github.com/Microsoft/monaco-editor-webpack-plugin#options
+      languages: ['pgsql']
+    }),
+
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production'
     }),
-
-    new webpack.NamedModulesPlugin()
   ]
 };

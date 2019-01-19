@@ -8,9 +8,12 @@ import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
 import TableCell from '@material-ui/core/TableCell';
+import CheckIcon from 'mdi-material-ui/Check';
 import Table from '../Table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 import Progress from '../Progress';
+import DbPolicy from '../../models/DbPolicy';
+import DbPolicyDialogForm from '../DbPolicyDialogForm';
 
 const styles = (theme) => ({
   progress: {
@@ -26,6 +29,9 @@ const styles = (theme) => ({
   tableRlsLabel: {
     paddingRight: theme.spacing.unit,
   },
+  clickableCell: {
+    cursor: 'pointer',
+  },
 });
 
 type Props = {
@@ -35,7 +41,7 @@ type Props = {
 
 function getPoliciesTableData(currentConnection, currentTable, roleName) {
   const role = currentConnection.roles[roleName];
-  const policiesTableData = currentTable.policies.getPolicies(roleName);
+  const policiesTableData = [...currentTable.policies.getPolicies(roleName)];
 
   role.parents.forEach(parentRoleName => {
     const parentData = getPoliciesTableData(currentConnection, currentTable, parentRoleName);
@@ -48,7 +54,17 @@ function getPoliciesTableData(currentConnection, currentTable, roleName) {
   return policiesTableData;
 }
 
-class DbTableRlsForm extends React.Component<Props> {
+type State = {
+  openPolicyDialog: boolean,
+  openedPolicy: DbPolicy | null,
+};
+
+class DbTableRlsForm extends React.Component<Props, State> {
+
+  state = {
+    openPolicyDialog: false,
+    openedPolicy: null,
+  };
 
   renderNoRows = () => {
     const { dbConnectionsManager, classes } = this.props;
@@ -58,6 +74,20 @@ class DbTableRlsForm extends React.Component<Props> {
     }
 
     return <Typography variant="subtitle2" align="center">No policies found</Typography>;
+  };
+
+  handlePolicyClick(policy: DbPolicy) {
+    this.setState({
+      openPolicyDialog: true,
+      openedPolicy: policy,
+    });
+  };
+
+  handlePolicyDialogClose = () => {
+    this.setState({
+      openPolicyDialog: false,
+      openedPolicy: null,
+    });
   };
 
   render() {
@@ -91,7 +121,7 @@ class DbTableRlsForm extends React.Component<Props> {
         name: 'permissive',
         header: <Typography variant="h6">Permissive</Typography>,
         cellProps: { padding: 'checkbox' },
-        cell: (row) => <Checkbox checked={row.permissive}/>,
+        cell: (row) => (row.permissive ? <CheckIcon /> : null),
       },
       {
         name: 'command',
@@ -108,10 +138,10 @@ class DbTableRlsForm extends React.Component<Props> {
       },
       {
         name: 'check',
-        header: <Typography variant="h6">With check</Typography>,
+        header: <Typography variant="h6">Check</Typography>,
         cell: ({ check }) => (
-          <Tooltip title={check}>
-            <Typography variant="body2" noWrap>{check}</Typography>
+          <Tooltip title={check || '–'}>
+            <Typography variant="body2" noWrap>{check || '–'}</Typography>
           </Tooltip>
         ),
       },
@@ -142,19 +172,28 @@ class DbTableRlsForm extends React.Component<Props> {
                 </TableCell>
               );
             }
-            return (
-              <React.Fragment>
-                {columns.map(column => {
-                  const { cell = (data) => data[column.name] } = column;
-                  return (
-                    <TableCell key={column.name}>{cell(tableRow)}</TableCell>
-                  );
-                })}
-              </React.Fragment>
-            );
+
+            const handlePolicyClick = this.handlePolicyClick.bind(this, tableRow);
+            return columns.map(column => {
+              const { cell = (data) => data[column.name] } = column;
+              return (
+                <TableCell
+                  key={column.name}
+                  className={classes.clickableCell}
+                  onClick={handlePolicyClick}
+                >
+                  {cell(tableRow)}
+                </TableCell>
+              );
+            });
           }}
           rowKey={(tableRow, i) => `${tableRow.name || tableRow}_${i}`}
           noRowsRenderer={this.renderNoRows}
+        />
+        <DbPolicyDialogForm
+          open={this.state.openPolicyDialog}
+          policy={this.state.openedPolicy}
+          onClose={this.handlePolicyDialogClose}
         />
       </React.Fragment>
     );

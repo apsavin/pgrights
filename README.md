@@ -9,8 +9,8 @@ GUI for PostgreSQL roles, privileges and policies
   - [ ] Possibility to edit table and column access
   - [ ] SQL commands log
   - [ ] Possibility to delete connections
-  - [ ] View for single policy with SQL syntax highlighting
-  - [ ] Possibility to edit policies
+  - [x] View for single policy with SQL syntax highlighting
+  - [x] Possibility to edit policies
   - [ ] Possibility to delete policies
 - [x] [0.1.0](https://github.com/apsavin/pgrights/releases/tag/v0.1.0-alpha) Readonly version
   - [x] Create and edit database connections

@@ -61,11 +61,14 @@ class DbPolicy {
             command: dataForUpdate.command,
             roles: dataForUpdate.roles,
           };
+          const typeQueryPart = dataForUpdate.permissive ? '' : 'as restrictive';
           const forQueryPart = formatQuery(`for $(command:raw) to $(roles:name)`, commandAndRoles);
           const qualifierQueryPart = dataForUpdate.qualifier ? `using (${dataForUpdate.qualifier})` : '';
           const checkQueryPart = dataForUpdate.check ? `with check (${dataForUpdate.check})` : '';
           await t.none(`drop ${policyQueryPart};`);
-          await t.none(`create ${policyQueryPart} ${forQueryPart} ${qualifierQueryPart} ${checkQueryPart};`);
+          await t.none(
+            `create ${policyQueryPart} ${typeQueryPart} ${forQueryPart} ${qualifierQueryPart} ${checkQueryPart};`
+          );
         });
       },
     });

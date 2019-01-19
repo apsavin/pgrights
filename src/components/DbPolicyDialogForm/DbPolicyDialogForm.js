@@ -61,6 +61,7 @@ class DbPolicyDialogForm extends React.Component<Props> {
     }
     return {
       ...data,
+      permissive: data.type === 'PERMISSIVE',
       qualifier: this.qualifier === null ? initialValues.qualifier : this.qualifier,
       check: this.check === null ? initialValues.check : this.check,
     }

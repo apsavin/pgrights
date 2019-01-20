@@ -8,6 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
+import classnames from 'classnames';
 import Progress from '../Progress';
 import Fetcher from '../../models/Fetcher';
 
@@ -35,6 +36,9 @@ const styles = theme => ({
   },
   listItemIcon: {
     marginRight: theme.spacing.unit,
+  },
+  selectedListItem: {
+    backgroundColor: theme.palette.action.hover,
   },
   filter: {
     width: '100%',
@@ -128,22 +132,31 @@ class Picker extends React.Component<Props> {
     }
   };
 
+  handleFilterFocus = () => {
+    this.setState({ filterFocused: true, selectedOptionIndex: 0 });
+  };
+
+  handleFilterBlur = () => {
+    this.setState({ filterFocused: false });
+  };
+
   renderList() {
-    const { classes, Icon } = this.props;
-    const { filteredOptions } = this.state;
+    const { classes, value, Icon } = this.props;
+    const { filteredOptions, filterFocused } = this.state;
     const { selectedOptionIndex } = this.state;
 
     const rowRenderer = ({ key, index, style }) => {
       const option = filteredOptions[index];
-      const isSelected = index === selectedOptionIndex;
-      const color = isSelected ? 'primary' : undefined;
+      const isSelected = filterFocused && index === selectedOptionIndex;
+      const isChosen = option === value;
+      const color = isChosen ? 'primary' : undefined;
 
       return (
         <ListItem
           dense
           button
           onClick={() => this.chooseOption({ option, index })}
-          className={classes.listItem}
+          className={classnames(classes.listItem, { [classes.selectedListItem]: isSelected })}
           key={key}
           style={style}
         >
@@ -194,6 +207,8 @@ class Picker extends React.Component<Props> {
             label={label}
             onChange={this.handleFilterChange}
             onKeyDown={this.handleFilterKeyDown}
+            onFocus={this.handleFilterFocus}
+            onBlur={this.handleFilterBlur}
             className={classes.filter}
             inputProps={{ className: classes.filterInnerShift }}
             InputLabelProps={{ className: classes.filterInnerShift }}

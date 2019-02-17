@@ -10,8 +10,20 @@ const styles = theme => ({
     margin: theme.spacing.unit * 2,
     position: 'relative',
   },
+  absolute: {
+    position: 'absolute',
+  },
+  small: {},
   autoMargin: {
-    margin: 'auto'
+    margin: 'auto',
+    '&$absolute': {
+      left: 'calc(50% - 25px)',
+      top: 'calc(50% - 25px)',
+      '&$small': {
+        left: 'calc(50% - 12px)',
+        top: 'calc(50% - 12px)',
+      },
+    },
   },
   background: {
     color: theme.palette.primary.main,
@@ -27,33 +39,40 @@ const styles = theme => ({
 type Props = {
   classes: $Call<typeof styles>,
   autoMargin?: boolean,
-  size: number,
+  absolute?: boolean,
+  size: 'big' | 'small',
   className?: string,
 };
 
 class Progress extends React.Component<Props> {
 
   static defaultProps = {
-    size: 50,
+    size: 'big',
   };
 
   render() {
-    const { classes, autoMargin, size, className } = this.props;
+    const { classes, autoMargin, size, className, absolute } = this.props;
+    const realSize = size === 'big' ? 50 : 24;
+    const rootClassNames = classnames(classes.root, className, {
+      [classes.autoMargin]: autoMargin,
+      [classes.absolute]: absolute,
+      [classes.small]: size !== 'big',
+    });
 
     return (
-      <div className={classnames(classes.root, className, { [classes.autoMargin]: autoMargin })}>
+      <div className={rootClassNames}>
         <CircularProgress
           variant="determinate"
           value={100}
           className={classes.background}
-          size={size}
+          size={realSize}
           thickness={4}
         />
         <CircularProgress
           variant="indeterminate"
           disableShrink
           className={classes.foreground}
-          size={size}
+          size={realSize}
           thickness={4}
         />
       </div>

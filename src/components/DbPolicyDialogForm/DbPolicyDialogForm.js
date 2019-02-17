@@ -1,6 +1,5 @@
 import React from 'react';
 import { inject } from 'mobx-react';
-import { withSnackbar } from 'notistack';
 import _ from 'lodash';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -16,16 +15,18 @@ import DbPolicy from '../../models/DbPolicy';
 import { dbPolicyCommandTypes } from '../../models/DbPolicy';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
+import withFetch from '../../hocs/withFetch';
+import type { FetchProps } from '../../hocs/withFetch';
 import Autocomplete from '../Autocomplete';
 import CodeEditor from '../CodeEditor';
+import Progress from '../Progress';
 
 type Props = {
   open: boolean,
   policy?: DbPolicy,
-  enqueueSnackbar: (string, Object) => void,
   rolesNames: Array<string>,
   onClose: () => void,
-};
+} & FetchProps;
 
 class DbPolicyDialogForm extends React.Component<Props> {
   qualifier = null;
@@ -68,17 +69,13 @@ class DbPolicyDialogForm extends React.Component<Props> {
   };
 
   handleSavePolicy = async (event) => {
-    const { policy, enqueueSnackbar } = this.props;
+    const { policy, fetch } = this.props;
     event.preventDefault();
     const dataForUpdate = this.collectPolicyData(event);
-    const fetcher = await DbPolicy.update(policy, dataForUpdate);
-    if (fetcher.inSuccessState) {
+    const { error } = await fetch(() => DbPolicy.update(policy, dataForUpdate));
+    if (!error) {
       this.props.onClose();
-      return;
     }
-    enqueueSnackbar(fetcher.error.message, {
-      variant: 'error',
-    });
   };
 
   getInitialValues() {
@@ -86,7 +83,7 @@ class DbPolicyDialogForm extends React.Component<Props> {
   }
 
   render() {
-    const { open, policy, onClose } = this.props;
+    const { open, policy, onClose, showLoader } = this.props;
     const policyData = this.getInitialValues();
 
     return (
@@ -164,6 +161,7 @@ class DbPolicyDialogForm extends React.Component<Props> {
           <DialogActions>
             <Button variant="contained" type="submit" color="primary">
               Save
+              { showLoader && <Progress autoMargin absolute size="small" /> }
             </Button>
             <Button variant="outlined" onClick={onClose} color="primary">
               Cancel
@@ -175,6 +173,6 @@ class DbPolicyDialogForm extends React.Component<Props> {
   }
 }
 
-export default withSnackbar(inject(({ dbConnectionsManager }) => ({
+export default withFetch()(inject(({ dbConnectionsManager }) => ({
   rolesNames: dbConnectionsManager.getCurrentConnection().rolesNames,
 }))(DbPolicyDialogForm));

@@ -16,7 +16,7 @@ class DbConnectionsManager {
     this.currentRoleName = '';
     this.connections = {};
     this.connectionsNames = [];
-    this.error = '';
+    this.error = null;
   }
 
   addConnection(connectionData: TDbConnectionData, fromStorage = false) {
@@ -56,11 +56,12 @@ class DbConnectionsManager {
     if (!connection.isFetched) {
       this.currentConnectionName = '';
       this.error = connection.schemasFetcher.error || connection.rolesFetcher.error;
-      return;
+      return this;
     }
     this.currentRoleName = connection.user;
     const firstSchemaName = connection.schemasNames.find((name) => name === 'public') || connection.schemasNames[0];
     yield this.setCurrentSchema({ schemaName: firstSchemaName });
+    return this;
   }).bind(this);
 
   getCurrentSchema(): DbSchema {

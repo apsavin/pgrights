@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { inject, observer } from 'mobx-react';
-import { withSnackbar } from 'notistack';
-import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
@@ -14,45 +12,22 @@ import DatabaseIcon from 'mdi-material-ui/Database';
 import EditIcon from 'mdi-material-ui/Pencil';
 import type Router from '../../models/Router';
 import type DbConnectionsManager from '../../models/DbConnectionsManager';
+import withFetch from '../../hocs/withFetch';
+import type { FetchProps } from '../../hocs/withFetch';
 import ModalLayout from '../../components/ModalLayout';
 import Progress from '../../components/Progress';
 
-const styles = () => ({
-  progress: {
-    position: 'absolute',
-    margin: 'auto',
-    left: 'calc(50% - 12px)',
-  },
-});
-
 type Props = {
   dbConnectionsManager: DbConnectionsManager,
-  enqueueSnackbar: (string, Object) => void,
   router: Router
-};
+} & FetchProps;
 
 class ConnectionChoosePage extends React.Component<Props> {
-  state = {
-    delayPassed: false,
-  };
-
-  componentWillUnmount() {
-    clearTimeout(this.timer);
-  }
-
   async handleChoose(connectionName) {
-    const { router, dbConnectionsManager, enqueueSnackbar } = this.props;
-    this.timer = setTimeout(() => {
-      this.setState({ delayPassed: true });
-    }, 300);
-    await dbConnectionsManager.connect({ connectionName });
-    if (!dbConnectionsManager.error) {
+    const { router, dbConnectionsManager, fetch } = this.props;
+    const { error } = await fetch(() => dbConnectionsManager.connect({ connectionName }));
+    if (!error) {
       router.toRights();
-    } else {
-      clearTimeout(this.timer);
-      enqueueSnackbar(dbConnectionsManager.error.message, {
-        variant: 'error',
-      });
     }
   }
 
@@ -63,9 +38,8 @@ class ConnectionChoosePage extends React.Component<Props> {
   }
 
   renderConnections() {
-    const { dbConnectionsManager, classes } = this.props;
-    const { connectionsNames, currentConnectionName, isFetched } = dbConnectionsManager;
-    const { delayPassed } = this.state;
+    const { dbConnectionsManager, showLoader } = this.props;
+    const { connectionsNames, currentConnectionName } = dbConnectionsManager;
 
     return connectionsNames.map((name) => {
       return (
@@ -79,8 +53,8 @@ class ConnectionChoosePage extends React.Component<Props> {
               <EditIcon/>
             </IconButton>
           </ListItemSecondaryAction>
-          {currentConnectionName === name && delayPassed &&!isFetched && (
-            <Progress size={24} className={classes.progress}/>
+          {currentConnectionName === name && showLoader && (
+            <Progress autoMargin absolute size="small" />
           )}
         </ListItem>
       );
@@ -104,6 +78,6 @@ class ConnectionChoosePage extends React.Component<Props> {
   }
 }
 
-export default withSnackbar(inject(({ dbConnectionsManager }) => ({
+export default withFetch()(inject(({ dbConnectionsManager }) => ({
   dbConnectionsManager,
-}))(observer(withStyles(styles)(ConnectionChoosePage))));
+}))(observer(ConnectionChoosePage)));

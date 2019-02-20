@@ -19,9 +19,10 @@ export const dbTablePrivilegeTypes = ['SELECT', 'INSERT', 'UPDATE', 'DELETE', 'T
 class DbTable {
   privileges: DbPrivilegesManager<DbTablePrivilege>;
 
-  constructor({ name, isRlsEnabled, db, schemaName }) {
+  constructor({ name, isRlsEnabled, isRlsForced, db, schemaName }) {
     this.name = name;
     this.isRlsEnabled = isRlsEnabled;
+    this.isRlsForced = isRlsForced;
     this.db = db;
     this.schemaName = schemaName;
     this.columns = {};
@@ -61,6 +62,24 @@ class DbTable {
                where p.schemaname = $(schemaName)
                  and p.tablename = $(tableName)
                order by policyname;`,
+          { schemaName, tableName },
+        );
+      },
+    });
+    this.rlsEnabledFetcher = new Fetcher({
+      fetch: () => {
+        const action = this.isRlsEnabled ? 'disable' : 'enable';
+        return db.none(
+          `alter table $(schemaName:name).$(tableName:name) ${action} row level security`,
+          { schemaName, tableName },
+        );
+      },
+    });
+    this.rlsForcedFetcher = new Fetcher({
+      fetch: () => {
+        const action = this.isRlsForced ? 'no force' : 'force';
+        return db.none(
+          `alter table $(schemaName:name).$(tableName:name) ${action} row level security`,
           { schemaName, tableName },
         );
       },
@@ -157,6 +176,22 @@ class DbTable {
     });
   });
 
+  toggleRls = flow(function* toggleRls() {
+    yield this.rlsEnabledFetcher.fetch();
+    if (this.rlsEnabledFetcher.inSuccessState) {
+      this.isRlsEnabled = !this.isRlsEnabled;
+    }
+    return this.rlsEnabledFetcher;
+  });
+
+  toggleRlsForce = flow(function* toggleRlsForce() {
+    yield this.rlsForcedFetcher.fetch();
+    if (this.rlsForcedFetcher.inSuccessState) {
+      this.isRlsForced = !this.isRlsForced;
+    }
+    return this.rlsForcedFetcher;
+  });
+
   get isFetched() {
     return this.columnsFetcher.inSuccessState &&
       this.privilegesFetcher.inSuccessState &&
@@ -169,6 +204,8 @@ decorate(DbTable, {
   columnsNames: observable,
   privileges: observable,
   policies: observable,
+  isRlsEnabled: observable,
+  isRlsForced: observable,
   isFetched: computed,
 });
 

@@ -11,8 +11,13 @@ class DbSchema {
     this.tablesFetcher = new Fetcher({
       fetch() {
         return db.query(
-          `select t.* from pg_catalog.pg_tables as t 
-           where t.schemaname = $(schemaName) order by t.tablename;`,
+          `select c.relname             as "name",
+                  c.relrowsecurity      as "isRlsEnabled",
+                  c.relforcerowsecurity as "isRlsForced"
+             from pg_class c left join pg_namespace n on n.oid = c.relnamespace
+             where c.relkind = any (array['r'::"char", 'p'::"char"])
+                  and n.nspname = $(schemaName) 
+            order by c.relname;`,
           { schemaName: name },
         );
       }
@@ -33,9 +38,9 @@ class DbSchema {
 
     const tables = this.tablesFetcher.result;
 
-    tables.forEach(({ tablename: name, rowsecurity: isRlsEnabled }) => {
+    tables.forEach(({ name, isRlsEnabled, isRlsForced }) => {
       this.tablesNames.push(name);
-      this.tables[name] = new DbTable({ name, isRlsEnabled, db, schemaName });
+      this.tables[name] = new DbTable({ name, isRlsEnabled, isRlsForced, db, schemaName });
     });
   });
 }

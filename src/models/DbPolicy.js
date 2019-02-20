@@ -55,19 +55,27 @@ class DbPolicy {
     const fetcher = new Fetcher({
       fetch: () => {
         return policy.db.tx(async t => {
-          const names = { name: dataForUpdate.name, schemaName: policy.schemaName, tableName: policy.tableName };
-          const policyQueryPart = formatQuery('policy $(name:name) on $(schemaName:name).$(tableName:name)', names);
+          const { name, schemaName, tableName } = policy;
+          const dropNames = { name, schemaName, tableName };
+
+          await t.none(`drop policy if exists $(name:name) on $(schemaName:name).$(tableName:name);`, dropNames);
+
+          const names = { name: dataForUpdate.name, schemaName, tableName };
+          const policyQueryPart = formatQuery('$(name:name) on $(schemaName:name).$(tableName:name)', names);
+
+          const typeQueryPart = dataForUpdate.permissive ? '' : 'as restrictive';
+
           const commandAndRoles = {
             command: dataForUpdate.command,
             roles: dataForUpdate.roles,
           };
-          const typeQueryPart = dataForUpdate.permissive ? '' : 'as restrictive';
           const forQueryPart = formatQuery(`for $(command:raw) to $(roles:name)`, commandAndRoles);
+
           const qualifierQueryPart = dataForUpdate.qualifier ? `using (${dataForUpdate.qualifier})` : '';
           const checkQueryPart = dataForUpdate.check ? `with check (${dataForUpdate.check})` : '';
-          await t.none(`drop ${policyQueryPart};`);
+
           await t.none(
-            `create ${policyQueryPart} ${typeQueryPart} ${forQueryPart} ${qualifierQueryPart} ${checkQueryPart};`
+            `create policy ${policyQueryPart} ${typeQueryPart} ${forQueryPart} ${qualifierQueryPart} ${checkQueryPart};`
           );
         });
       },
@@ -80,7 +88,7 @@ class DbPolicy {
     }
 
     return fetcher;
-  })
+  });
 }
 
 decorate(DbPolicy, {

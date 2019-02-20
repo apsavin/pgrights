@@ -1,6 +1,7 @@
 import React from 'react';
 import { inject } from 'mobx-react';
 import _ from 'lodash';
+import flowRight from 'lodash/flowRight';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -15,7 +16,7 @@ import DbPolicy from '../../models/DbPolicy';
 import { dbPolicyCommandTypes } from '../../models/DbPolicy';
 import FormControl from '@material-ui/core/FormControl';
 import FormLabel from '@material-ui/core/FormLabel';
-import withFetch from '../../hocs/withFetch';
+import withFetch, { defaultMap } from '../../hocs/withFetch';
 import type { FetchProps } from '../../hocs/withFetch';
 import Autocomplete from '../Autocomplete';
 import CodeEditor from '../CodeEditor';
@@ -173,6 +174,13 @@ class DbPolicyDialogForm extends React.Component<Props> {
   }
 }
 
-export default withFetch()(inject(({ dbConnectionsManager }) => ({
-  rolesNames: dbConnectionsManager.getCurrentConnection().rolesNames,
-}))(DbPolicyDialogForm));
+const enhance = flowRight(
+  withFetch(defaultMap, {
+    showSuccessSnackbar: true,
+    successSnackbarText: 'Policy saved'
+  }),
+  inject(({ dbConnectionsManager }) => ({
+    rolesNames: dbConnectionsManager.getCurrentConnection().rolesNames,
+  })),
+);
+export default enhance(DbPolicyDialogForm);

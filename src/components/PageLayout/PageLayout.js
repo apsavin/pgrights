@@ -18,7 +18,7 @@ class PageLayout extends React.Component<Props> {
 
     return (
       <main className={classes.layout}>
-          {children}
+        {children}
       </main>
     );
   }

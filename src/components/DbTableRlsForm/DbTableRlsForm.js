@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
+import { createViewModel } from 'mobx-utils/lib/create-view-model';
 import withStyles from '@material-ui/core/styles/withStyles';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -8,12 +9,15 @@ import Typography from '@material-ui/core/Typography';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
 import TableCell from '@material-ui/core/TableCell';
+import Button from '@material-ui/core/Button';
 import CheckIcon from 'mdi-material-ui/Check';
+import flowRight from 'lodash/flowRight';
 import Table from '../Table';
 import DbConnectionsManager from '../../models/DbConnectionsManager';
 import Progress from '../Progress';
 import DbPolicy from '../../models/DbPolicy';
 import DbPolicyDialogForm from '../DbPolicyDialogForm';
+import withFetch from '../../hocs/withFetch';
 
 const styles = (theme) => ({
   progress: {
@@ -22,8 +26,6 @@ const styles = (theme) => ({
     flexDirection: 'column',
   },
   tableRlsWrapper: {
-    display: 'flex',
-    alignItems: 'center',
     marginBottom: theme.spacing.unit * 2,
   },
   tableRlsLabel: {
@@ -35,6 +37,12 @@ const styles = (theme) => ({
 });
 
 type Props = {
+  runToggleRlsForce: () => Promise<{ error: Error | null }>,
+  toggleRlsForceInProgress: boolean,
+  showToggleRlsForceLoader: boolean,
+  runToggleRls: () => Promise<{ error: Error | null }>,
+  toggleRlsInProgress: boolean,
+  showToggleRlsLoader: boolean,
   classes: $Call<typeof styles>,
   dbConnectionsManager: DbConnectionsManager,
 };
@@ -66,9 +74,28 @@ class DbTableRlsForm extends React.Component<Props, State> {
     openedPolicy: null,
   };
 
-  renderNoRows = () => {
-    const { dbConnectionsManager, classes } = this.props;
+  getCurrentTableViewModel() {
+    const { dbConnectionsManager } = this.props;
     const currentTable = dbConnectionsManager.getCurrentTable();
+
+    if (!currentTable) {
+      return null;
+    }
+
+    if (!this.currentTableViewModel) {
+      this.currentTableViewModel = createViewModel(currentTable);
+    }
+
+    if (this.currentTableViewModel.model !== currentTable) {
+      this.currentTableViewModel.model = currentTable;
+    }
+
+    return this.currentTableViewModel;
+  }
+
+  renderNoRows = () => {
+    const { classes } = this.props;
+    const currentTable = this.getCurrentTableViewModel();
     if (!currentTable || !currentTable.policiesFetcher.inSuccessState) {
       return <div className={classes.progress}><Progress/></div>;
     }
@@ -90,9 +117,51 @@ class DbTableRlsForm extends React.Component<Props, State> {
     });
   };
 
+  handleRlsEnabledChange = () => {
+    const currentTable = this.getCurrentTableViewModel();
+    if (!currentTable) {
+      return;
+    }
+
+    currentTable.isRlsEnabled = !currentTable.isRlsEnabled;
+  };
+
+  handleRlsEnabledSave = async () => {
+    const currentTable = this.getCurrentTableViewModel();
+    if (!currentTable || this.props.toggleRlsInProgress) {
+      return;
+    }
+
+    const { error } = await this.props.runToggleRls(() => currentTable.model.toggleRls());
+    if (!error) {
+      currentTable.resetProperty('isRlsEnabled');
+    }
+  };
+
+  handleRlsForcedChange = () => {
+    const currentTable = this.getCurrentTableViewModel();
+    if (!currentTable) {
+      return;
+    }
+
+    currentTable.isRlsForced = !currentTable.isRlsForced;
+  };
+
+  handleRlsForcedSave = async () => {
+    const currentTable = this.getCurrentTableViewModel();
+    if (!currentTable) {
+      return;
+    }
+
+    const { error } = await this.props.runToggleRlsForce(() => currentTable.model.toggleRlsForce());
+    if (!error) {
+      currentTable.resetProperty('isRlsForced');
+    }
+  };
+
   render() {
     const { dbConnectionsManager, classes } = this.props;
-    const currentTable = dbConnectionsManager.getCurrentTable();
+    const currentTable = this.getCurrentTableViewModel();
     const currentConnection = dbConnectionsManager.getCurrentConnection();
     const { currentRoleName: roleName } = dbConnectionsManager;
     const currentRole = currentConnection.roles[roleName];
@@ -156,16 +225,40 @@ class DbTableRlsForm extends React.Component<Props, State> {
     ];
 
     const isRlsEnabled = currentTable && currentTable.isRlsEnabled;
+    const isRlsForced = currentTable && currentTable.isRlsForced;
 
     return (
       <React.Fragment>
         <div className={classes.tableRlsWrapper}>
-          <Typography variant="h6" className={classes.tableRlsLabel}>Table:</Typography>
           <FormGroup row>
             <FormControlLabel
-              control={<Checkbox checked={isRlsEnabled}/>}
-              label={`Row-level security ${isRlsEnabled ? 'enabled' : 'disabled'}`}
+              control={<Checkbox checked={isRlsEnabled} onChange={this.handleRlsEnabledChange}/>}
+              label={`Row-level security is ${isRlsEnabled ? 'enabled' : 'disabled'}`}
             />
+            {currentTable && currentTable.isRlsEnabled !== currentTable.model.isRlsEnabled && (
+              <Button
+                color="primary"
+                variant="text"
+                onClick={this.handleRlsEnabledSave}
+              >
+                Save
+              </Button>
+            )}
+          </FormGroup>
+          <FormGroup row>
+            <FormControlLabel
+              control={<Checkbox checked={isRlsForced} onChange={this.handleRlsForcedChange}/>}
+              label={`Row-level security is ${isRlsForced ? 'forced' : 'not forced'}`}
+            />
+            {currentTable && currentTable.isRlsForced !== currentTable.model.isRlsForced && (
+              <Button
+                color="primary"
+                variant="text"
+                onClick={this.handleRlsForcedSave}
+              >
+                Save
+              </Button>
+            )}
           </FormGroup>
         </div>
         <Divider/>
@@ -208,4 +301,24 @@ class DbTableRlsForm extends React.Component<Props, State> {
   }
 }
 
-export default withStyles(styles)(observer(DbTableRlsForm));
+const enhance = flowRight(
+  withFetch({
+    fetch: 'runToggleRlsForce',
+    inProgress: 'toggleRlsForceInProgress',
+    showLoader: 'showToggleRlsForceLoader',
+  }, {
+    showSuccessSnackbar: true,
+    successSnackbarText: 'RLS force altered successfully'
+  }),
+  withFetch({
+    fetch: 'runToggleRls',
+    inProgress: 'toggleRlsInProgress',
+    showLoader: 'showToggleRlsLoader',
+  }, {
+    showSuccessSnackbar: true,
+    successSnackbarText: 'RLS altered successfully'
+  }),
+  withStyles(styles),
+  observer,
+);
+export default enhance(DbTableRlsForm);

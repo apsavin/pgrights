@@ -6,7 +6,7 @@ import DbPoliciesManager from './DbPoliciesManager';
 import Fetcher from './Fetcher';
 import DbPolicy from './DbPolicy';
 
-type DbTablePrivilege = {
+export type DbTablePrivilege = {
   grantor: string,
   grantee: string,
   type: 'SELECT' | 'UPDATE' | 'DELETE' | 'INSERT' | 'REFERENCES' | 'TRUNCATE' | 'TRIGGER' | 'DELETE',

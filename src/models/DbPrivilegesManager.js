@@ -1,5 +1,5 @@
 import { decorate, observable } from 'mobx';
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 
 type DbPrivilege = {
   grantor: string,
@@ -18,8 +18,12 @@ class DbPrivilegesManager<Privilege: DbPrivilege> {
     this.privilegesByGrantee[privilege.grantee][privilege.type] = privilege;
   }
 
-  get(grantee, type): ?Privilege {
-    return get(this.privilegesByGrantee, [grantee, type]);
+  get(grantee, type): Privilege | null {
+    return get(this.privilegesByGrantee, [grantee, type], null);
+  }
+
+  remove(grantee, type): void {
+    set(this.privilegesByGrantee, [grantee, type], null);
   }
 }
 

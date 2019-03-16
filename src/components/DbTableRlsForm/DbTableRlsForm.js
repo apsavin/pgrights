@@ -235,7 +235,7 @@ class DbTableRlsForm extends React.Component<Props, State> {
               control={<Checkbox checked={isRlsEnabled} onChange={this.handleRlsEnabledChange}/>}
               label={`Row-level security is ${isRlsEnabled ? 'enabled' : 'disabled'}`}
             />
-            {currentTable && currentTable.isRlsEnabled !== currentTable.model.isRlsEnabled && (
+            {currentTable && currentTable.isPropertyDirty('isRlsEnabled') && (
               <Button
                 color="primary"
                 variant="text"
@@ -250,7 +250,7 @@ class DbTableRlsForm extends React.Component<Props, State> {
               control={<Checkbox checked={isRlsForced} onChange={this.handleRlsForcedChange}/>}
               label={`Row-level security is ${isRlsForced ? 'forced' : 'not forced'}`}
             />
-            {currentTable && currentTable.isRlsForced !== currentTable.model.isRlsForced && (
+            {currentTable && currentTable.isPropertyDirty('isRlsForced') && (
               <Button
                 color="primary"
                 variant="text"

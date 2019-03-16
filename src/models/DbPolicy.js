@@ -1,5 +1,5 @@
 import { decorate, observable, flow } from 'mobx';
-const { formatQuery } = require('pg-promise/lib/formatting');
+import { formatQuery } from 'pg-promise/lib/formatting';
 import Fetcher from './Fetcher';
 
 type DbPolicyArgs = {

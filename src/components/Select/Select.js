@@ -7,10 +7,10 @@ import MenuItem from '@material-ui/core/MenuItem';
 
 const styles = theme => ({
   label: {
-    paddingLeft: theme.spacing.unit,
+    paddingLeft: theme.spacing(1),
   },
   selectMenu: {
-    paddingLeft: theme.spacing.unit,
+    paddingLeft: theme.spacing(1),
   }
 });
 

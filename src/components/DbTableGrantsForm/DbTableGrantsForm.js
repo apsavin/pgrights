@@ -28,10 +28,10 @@ const styles = (theme) => ({
   tableGrantsWrapper: {
     display: 'flex',
     alignItems: 'center',
-    marginBottom: theme.spacing.unit * 2,
+    marginBottom: theme.spacing(2),
   },
   tableGrantsLabel: {
-    paddingRight: theme.spacing.unit,
+    paddingRight: theme.spacing(1),
   },
   headerCell: {
     flexGrow: 1,
@@ -53,12 +53,12 @@ const styles = (theme) => ({
     flexGrow: 1,
   },
   buttons: {
-    marginTop: theme.spacing.unit * 2,
+    marginTop: theme.spacing(2),
     display: 'flex',
     justifyContent: 'flex-end',
   },
   submit: {
-    marginRight: theme.spacing.unit,
+    marginRight: theme.spacing(1),
   },
 });
 

@@ -47,8 +47,6 @@ export default merge.smart(baseConfig, {
 
   entry: [
     'react-hot-loader/patch',
-    `webpack-dev-server/client?http://localhost:${port}/`,
-    'webpack/hot/only-dev-server',
     require.resolve('../src/index')
   ],
 
@@ -214,8 +212,6 @@ export default merge.smart(baseConfig, {
     new webpack.HotModuleReplacementPlugin({
       multiStep: true
     }),
-
-    new webpack.NoEmitOnErrorsPlugin(),
 
     /**
      * Create global constants which can be configured at compile time.

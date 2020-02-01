@@ -28,14 +28,15 @@ const styles = theme => ({
     flexGrow: 1,
   },
   listItem: {
-    paddingLeft: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
     paddingTop: 0,
     paddingBottom: 0,
-    height: '32px',
+    height: theme.spacing(4),
   },
   listItemIcon: {
-    marginRight: theme.spacing.unit,
+    minWidth: 'auto',
+    marginRight: theme.spacing(1),
   },
   selectedListItem: {
     backgroundColor: theme.palette.action.hover,
@@ -43,11 +44,11 @@ const styles = theme => ({
   filter: {
     width: '100%',
     display: 'flex',
-    marginTop: theme.spacing.unit,
+    marginTop: theme.spacing(1),
   },
   filterInnerShift: {
-    paddingLeft: theme.spacing.unit,
-    paddingRight: theme.spacing.unit,
+    paddingLeft: theme.spacing(1),
+    paddingRight: theme.spacing(1),
   },
   progress: {
     flexGrow: 1,

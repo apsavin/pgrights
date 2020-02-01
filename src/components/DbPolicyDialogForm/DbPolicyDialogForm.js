@@ -98,7 +98,7 @@ class DbPolicyDialogForm extends React.Component<Props> {
             {policy ? 'Edit policy' : 'Create policy'}
           </DialogTitle>
           <DialogContent>
-            <Grid container spacing={24}>
+            <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TextField fullWidth name="name" label="Name" defaultValue={policyData.name}/>
               </Grid>

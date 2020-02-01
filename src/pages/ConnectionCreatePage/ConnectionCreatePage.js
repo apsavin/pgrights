@@ -44,7 +44,7 @@ class ConnectionCreatePage extends React.Component<Props> {
           New database connection
         </Typography>
         <form onSubmit={this.handleSubmit}>
-          <Grid container spacing={24}>
+          <Grid container spacing={3}>
             <Grid item xs={12}>
               <TextField name="name" fullWidth label="Name" defaultValue="postgres@localhost" />
             </Grid>

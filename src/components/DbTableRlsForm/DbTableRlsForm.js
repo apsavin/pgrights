@@ -26,10 +26,10 @@ const styles = (theme) => ({
     flexDirection: 'column',
   },
   tableRlsWrapper: {
-    marginBottom: theme.spacing.unit * 2,
+    marginBottom: theme.spacing(2),
   },
   tableRlsLabel: {
-    paddingRight: theme.spacing.unit,
+    paddingRight: theme.spacing(1),
   },
   clickableCell: {
     cursor: 'pointer',
@@ -190,7 +190,7 @@ class DbTableRlsForm extends React.Component<Props, State> {
         header: <Typography variant="h6">Name</Typography>,
         cell: ({ name }) => (
           <Tooltip title={name}>
-            <Typography variant="body2" noWrap>{name}</Typography>
+            <Typography variant="body1" noWrap>{name}</Typography>
           </Tooltip>
         ),
       },
@@ -209,7 +209,7 @@ class DbTableRlsForm extends React.Component<Props, State> {
         header: <Typography variant="h6">Qualifier</Typography>,
         cell: ({ qualifier }) => (
           <Tooltip title={qualifier}>
-            <Typography variant="body2" noWrap>{qualifier}</Typography>
+            <Typography variant="body1" noWrap>{qualifier}</Typography>
           </Tooltip>
         ),
       },
@@ -218,7 +218,7 @@ class DbTableRlsForm extends React.Component<Props, State> {
         header: <Typography variant="h6">Check</Typography>,
         cell: ({ check }) => (
           <Tooltip title={check || '–'}>
-            <Typography variant="body2" noWrap>{check || '–'}</Typography>
+            <Typography variant="body1" noWrap>{check || '–'}</Typography>
           </Tooltip>
         ),
       },

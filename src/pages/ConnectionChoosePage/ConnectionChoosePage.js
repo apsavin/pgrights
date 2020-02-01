@@ -8,6 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
+import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import DatabaseIcon from 'mdi-material-ui/Database';
 import EditIcon from 'mdi-material-ui/Pencil';
 import type Router from '../../models/Router';
@@ -44,18 +45,20 @@ class ConnectionChoosePage extends React.Component<Props> {
     return connectionsNames.map((name) => {
       return (
         <ListItem divider button key={name} onClick={() => this.handleChoose(name)}>
-          <Avatar>
-            <DatabaseIcon/>
-          </Avatar>
+          {currentConnectionName === name && showLoader && (
+            <Progress autoMargin absolute size="small" />
+          )}
+          <ListItemAvatar>
+            <Avatar>
+              <DatabaseIcon/>
+            </Avatar>
+          </ListItemAvatar>
           <ListItemText primary={name}/>
           <ListItemSecondaryAction>
             <IconButton aria-label="Edit" onClick={() => this.handleEdit(name)}>
               <EditIcon/>
             </IconButton>
           </ListItemSecondaryAction>
-          {currentConnectionName === name && showLoader && (
-            <Progress autoMargin absolute size="small" />
-          )}
         </ListItem>
       );
     });

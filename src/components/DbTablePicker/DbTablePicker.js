@@ -9,9 +9,9 @@ import DbConnectionsManager from '../../models/DbConnectionsManager';
 
 const styles = theme => ({
   paper: {
-    padding: theme.spacing.unit * 2,
-    [theme.breakpoints.up(600 + theme.spacing.unit * 3 * 2)]: {
-      padding: theme.spacing.unit * 3,
+    padding: theme.spacing(2),
+    [theme.breakpoints.up(600 + theme.spacing(3 * 2))]: {
+      padding: theme.spacing(3),
     },
   },
   selectWrapper: {

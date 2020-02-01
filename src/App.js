@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { hot } from 'react-hot-loader/root'
 import { observer, Provider } from 'mobx-react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -29,7 +30,8 @@ type Props = {
 };
 
 class App extends React.Component<Props> {
-  componentWillMount() {
+  constructor(props) {
+    super(props);
     const { router } = this.props;
 
     if (persistentStorage.store.connections) {
@@ -75,4 +77,4 @@ class App extends React.Component<Props> {
   }
 }
 
-export default observer(App);
+export default hot(observer(App));

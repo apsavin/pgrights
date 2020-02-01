@@ -52,10 +52,17 @@ class DbConnection {
   }
 
   async getDb() {
+    if (this.dbPromise) {
+      await this.dbPromise;
+    }
     if (!this.db) {
-      const { database, host, port, user } = this;
-      const password = this.password || await keytar.getPassword(this.name, user);
-      this.db = pgp({ database, host, port, user, password });
+      this.dbPromise = new Promise(async (resolve) => {
+        const { database, host, port, user } = this;
+        const password = this.password || await keytar.getPassword(this.name, user);
+        this.db = pgp({ database, host, port, user, password });
+        resolve();
+      });
+      await this.dbPromise;
     }
     return this.db;
   }

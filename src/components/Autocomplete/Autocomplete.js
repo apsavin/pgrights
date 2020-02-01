@@ -59,7 +59,7 @@ const styles = theme => ({
     position: 'relative',
   },
   chip: {
-    margin: `${theme.spacing.unit / 2}px ${theme.spacing.unit / 4}px`,
+    margin: `${theme.spacing(0.5)}px ${theme.spacing(0.25)}px`,
   },
   inputRoot: {
     flexWrap: 'wrap',

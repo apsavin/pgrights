@@ -18,9 +18,9 @@ import DbTableRlsForm from '../../components/DbTableRlsForm'
 
 const styles = theme => ({
   paper: {
-    padding: theme.spacing.unit * 2,
-    [theme.breakpoints.up(600 + theme.spacing.unit * 3 * 2)]: {
-      padding: theme.spacing.unit * 3,
+    padding: theme.spacing(2),
+    [theme.breakpoints.up(600 + theme.spacing(3 * 2))]: {
+      padding: theme.spacing(3),
     },
   },
   sideWrapper: {
@@ -32,7 +32,7 @@ const styles = theme => ({
   },
   centerWrapper: {
     backgroundColor: theme.palette.background.default,
-    padding: theme.spacing.unit * 2,
+    padding: theme.spacing(2),
     width: '100%',
     overflow: 'auto',
   },

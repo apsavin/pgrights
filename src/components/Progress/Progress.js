@@ -7,7 +7,7 @@ import classnames from 'classnames';
 
 const styles = theme => ({
   root: {
-    margin: theme.spacing.unit * 2,
+    margin: theme.spacing(2),
     position: 'relative',
   },
   absolute: {

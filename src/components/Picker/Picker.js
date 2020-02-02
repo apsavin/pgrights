@@ -9,6 +9,8 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Tooltip from '@material-ui/core/Tooltip';
 import TextField from '@material-ui/core/TextField';
 import classnames from 'classnames';
+import { createSearchFunction } from 'micromys';
+import highlightSentence from 'micromys/src/highlightSentence';
 import Progress from '../Progress';
 import Fetcher from '../../models/Fetcher';
 
@@ -40,6 +42,9 @@ const styles = theme => ({
   },
   selectedListItem: {
     backgroundColor: theme.palette.action.hover,
+  },
+  highlightedText: {
+    backgroundColor: 'yellow',
   },
   filter: {
     width: '100%',
@@ -73,6 +78,7 @@ class Picker extends React.Component<Props> {
     filterValue: '',
     filteredOptions: [],
     options: [],
+    filter: () => [],
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -82,10 +88,14 @@ class Picker extends React.Component<Props> {
       return null;
     }
 
+    const filteredOptions = options.map(sentence => ({ sentence }));
+    const search = createSearchFunction(filteredOptions);
+
     return {
       selectedOptionIndex: options.findIndex(option => option === value),
       filterValue: '',
-      filteredOptions: options,
+      filteredOptions,
+      filter: (value) => value.length ? search(value) : filteredOptions,
       options,
     };
   }
@@ -93,7 +103,7 @@ class Picker extends React.Component<Props> {
   chooseOption = ({ option, index }) => {
     const { onChange } = this.props;
     this.selectOption(index);
-    onChange(option);
+    onChange(option.sentence);
   };
 
   selectOption = (index) => {
@@ -101,12 +111,10 @@ class Picker extends React.Component<Props> {
   };
 
   handleFilterChange = (event) => {
-    const { options } = this.props;
     const { value } = event.target;
-    const matcher = new RegExp(value, 'i');
     this.setState({
       filterValue: value,
-      filteredOptions: options.filter(option => matcher.test(option)),
+      filteredOptions: this.state.filter(value),
       selectedOptionIndex: 0,
     });
   };
@@ -148,9 +156,18 @@ class Picker extends React.Component<Props> {
 
     const rowRenderer = ({ key, index, style }) => {
       const option = filteredOptions[index];
+      const { sentence: optionText, highlights } = option;
       const isSelected = filterFocused && index === selectedOptionIndex;
-      const isChosen = option === value;
+      const isChosen = optionText === value;
       const color = isChosen ? 'primary' : undefined;
+      const highlightedText = highlightSentence({
+        sentence: optionText, highlights, highlight: (text) => ({ text }),
+      }).map((chunk, i) => {
+        if (typeof chunk === 'string') {
+          return chunk;
+        }
+        return <span className={classes.highlightedText} key={`${i}_${chunk.text}`}>{chunk.text}</span>;
+      });
 
       return (
         <ListItem
@@ -164,9 +181,9 @@ class Picker extends React.Component<Props> {
           <ListItemIcon className={classes.listItemIcon}>
             <Icon fontSize="small" color={color}/>
           </ListItemIcon>
-          <Tooltip title={option}>
+          <Tooltip title={optionText}>
             <ListItemText
-              primary={option}
+              primary={highlightedText}
               className={classes.labelWrapper}
               primaryTypographyProps={{ className: classes.label, noWrap: true, color }}
             />

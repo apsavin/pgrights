@@ -76,6 +76,7 @@
     "keytar": "^4.13.0",
     "lodash": "^4.17.15",
     "mdi-material-ui": "^6.11.0",
+    "micromys": "^1.0.0",
     "mobx": "^5.15.3",
     "mobx-react": "^6.1.4",
     "mobx-utils": "^5.2.0",

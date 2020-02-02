@@ -5758,6 +5758,11 @@ micromatch@^3.0.4, micromatch@^3.1.10, micromatch@^3.1.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.2"
 
+micromys@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/micromys/-/micromys-1.0.0.tgz#af232c49ab3f6e24e6aee447a5dcae63ee7fed87"
+  integrity sha512-pPxD5KajA2Y9+BpsjoHm2LclOJ0IBQhsbl9jZOUJXYnKFvtE/2TypDvMdMxJT0lnWh68S2XB5mGM/o1qFxVdww==
+
 miller-rabin@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/miller-rabin/-/miller-rabin-4.0.1.tgz#f080351c865b0dc562a8462966daa53543c78a4d"

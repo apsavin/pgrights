@@ -140,7 +140,7 @@
     "cross-env": "^5.2.0",
     "css-loader": "^1.0.1",
     "detect-port": "^1.2.3",
-    "electron": "^7.1.10",
+    "electron": "^11.5.0",
     "electron-builder": "^22.3.2",
     "electron-devtools-installer": "^2.2.4",
     "enzyme": "^3.3.0",
